@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data class="ItemFileDataBinding">
+       <variable
+            name="itemFileParentViewModel"
+             type="com.gzf01.rxzsmbclient.vm.BrowseViewModel" />
+        <variable
+            name="itemFile"
+            type="com.gzf01.rxzsmbclient.entity.File" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="@dimen/dp_5"
+        android:clickable="true"
+        android:longClickable="true"
+        android:onClick="@{()->itemFileParentViewModel.clickFile(itemFile)}"
+        app:longClickListen="@{(v)->itemFileParentViewModel.longClickFile(itemFile)}"
+        android:id="@+id/admin_item_user"
+        android:background="@drawable/bottom_solid_grey"
+        android:focusable="true">
+
+        <ImageView
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/dp_15"
+            android:src="@{itemFile.dir?@drawable/ic_folder:@drawable/ic_file}"/>
+
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+
+            android:layout_marginHorizontal="@dimen/dp_10">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:text="@{itemFile.name}"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/sp_12"
+                android:textColor="@color/black"
+                android:singleLine="true"
+                android:ellipsize="end"
+
+                app:myDate='@{itemFile.CTime}'/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="@dimen/dp_25"
+            android:layout_height="@dimen/dp_25"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/dp_15"
+            app:isVisible="@{itemFile.dir}"
+            android:src="@drawable/ic_right"/>
+
+
+
+    </LinearLayout>
+	
+</layout>
