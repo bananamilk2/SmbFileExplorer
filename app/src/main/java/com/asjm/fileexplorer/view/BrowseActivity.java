@@ -1,11 +1,14 @@
 package com.asjm.fileexplorer.view;
 
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -18,10 +21,17 @@ import com.asjm.fileexplorer.databinding.ActivityBrowseBinding;
 import com.asjm.fileexplorer.entity.FileSmb;
 import com.asjm.fileexplorer.entity.Server;
 import com.asjm.fileexplorer.holder.FileViewHolder;
+import com.asjm.fileexplorer.listener.IProgressListener;
 import com.asjm.fileexplorer.listener.OnItemClickListener;
+import com.asjm.fileexplorer.utils.DialogHelper;
+import com.asjm.fileexplorer.utils.FileUtil;
 import com.asjm.lib.util.ALog;
+import com.hb.dialog.dialog.LoadingDialog;
+import com.hb.dialog.myDialog.MyImageMsgDialog;
 import com.litesuits.common.io.IOUtils;
+//import com.litesuits.common.io.IOUtils;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,34 +99,52 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 
         baseUrl = baseUrlBuilder.toString();
 
-        getRemoteDir(baseUrl);
+        MyImageMsgDialog myImageMsgDialog = new MyImageMsgDialog(this).builder()
+                .setImageLogo(getResources().getDrawable(R.mipmap.ic_launcher))
+                .setMsg("连接中...");
+        ImageView logoImg = myImageMsgDialog.getLogoImg();
+        logoImg.setImageResource(R.drawable.connect_anim);
+        AnimationDrawable connectAnimation = (AnimationDrawable) logoImg.getDrawable();
+        connectAnimation.start();
+
+        myImageMsgDialog.setCancelable(false);
+        myImageMsgDialog.show();
+
+        getRemoteDir(baseUrl, new IProgressListener() {
+            @Override
+            public void onComplete() {
+                ALog.getInstance().d("onComplete");
+                myImageMsgDialog.dismiss();
+            }
+
+            @Override
+            public void onStart() {
+                ALog.getInstance().d("onStart");
+
+            }
+        });
     }
 
-    public void getRemoteDir(String url) {
-        //开启链接服务器的线程
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void getRemoteDir(String url, IProgressListener listener) {
         new Thread(() -> {
+            if (listener != null)
+                listener.onStart();
             try {
                 ALog.getInstance().d("getRemoteDir: " + url);
-
                 smbFile = new SmbFile(url);
 
-                long contentLengthLong = smbFile.getContentLengthLong();
-                ALog.getInstance().d(contentLengthLong + "");
-                //判断是否是一个目录
+
                 if (smbFile.isDirectory()) {
                     ArrayList<FileSmb> list = new ArrayList<>();
-                    ALog.getInstance().d("");
                     //添加返回上级目录
 
                     FileSmb f = new FileSmb();
                     f.setDir(true);
                     f.setFileName("../");
                     f.setIndex(-1);
+                    f.setFileTime(new Date());
                     list.add(f);
-
-                    //获取当前目录下的文件、目录列表(仅存在的)
-                    SmbFile[] smbFiles = smbFile.listFiles();
-                    ALog.getInstance().d(smbFiles.length + "");
 
                     subFiles = Arrays.stream(smbFile.listFiles()).filter((e) -> {
                         try {
@@ -127,43 +155,58 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                         } catch (SmbException ex) {
                             return false;
                         }
-                    }).sorted((sf1, sf2) -> {
-                        //进行排序，目录在前，文件在后。按名字排序
-                        try {
-                            //同为目录或者文件
-                            if (sf1.isDirectory() == sf2.isDirectory()) {
-                                return sf1.getName().compareTo(sf2.getName());
-                            } else {
-                                //一个是目录一个是文件，则目录在前
-                                return sf1.isDirectory() ? -1 : 1;
-                            }
-                        } catch (SmbException e) {
-                            return 0;
-                        }
-                    }).toArray(SmbFile[]::new);
-                    //依次加入显示列表
+                    })
+                            .sorted((sf1, sf2) -> {
+                                //进行排序，目录在前，文件在后。按名字排序
+                                try {
+                                    //同为目录或者文件
+                                    if (sf1.isDirectory() == sf2.isDirectory()) {
+                                        return sf1.getName().compareTo(sf2.getName());
+                                    } else {
+                                        //一个是目录一个是文件，则目录在前
+                                        return sf1.isDirectory() ? -1 : 1;
+                                    }
+                                } catch (SmbException e) {
+                                    return 0;
+                                }
+                            })
+                            .toArray(SmbFile[]::new);
+
                     for (int i = 0; i < subFiles.length; i++) {
                         SmbFile sf = subFiles[i];
                         FileSmb fs = new FileSmb();
                         fs.setIndex(i);
                         fs.setFileName(sf.getName());
-                        fs.setFileTime(new Date(sf.createTime()));
+                        Date time = new Date(sf.createTime());
+                        long l = sf.fileIndex();
+                        String canonicalPath = sf.getCanonicalPath();
+                        long contentLengthLong = sf.getContentLengthLong();
+                        long date = sf.getDate();
+                        String dfsPath = sf.getDfsPath();
+                        long diskFreeSpace = sf.getDiskFreeSpace();
+                        String path = sf.getPath();
+                        int type = sf.getType();
+
+                        fs.setFileTime(time);
                         fs.setDir(sf.isDirectory());
+                        fs.setFileSize(contentLengthLong);
+
                         list.add(fs);
-                        ALog.getInstance().d("addfile" + sf.toString());
+//                        ALog.getInstance().d("\n" + i + ", name = " + sf.getName() + ", createTime = " + time.toString()
+//                                + ", fileIndex = " + l + ", canonicalPath = " + canonicalPath + "\n"
+//                                + ", contentLengthLong = " + contentLengthLong +"  " + FileUtil.formatFileSize(contentLengthLong) + ", ");
                     }
-                    //更新界面
                     fileList.clear();
                     fileList.addAll(list);
                     runOnUiThread(() -> adapter.notifyDataSetChanged());
-
                 } else {
                     throw new Exception("这不是一个目录");
                 }
             } catch (Exception e) {
-
+                ALog.getInstance().d(e.toString());
             } finally {
-
+                if (listener != null)
+                    runOnUiThread(listener::onComplete);
             }
         }).start();
     }
@@ -180,48 +223,62 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 //将当前目录和根目录比较，如果相等则停止返回上一级
                 if (!smbFile.getPath().equals(baseUrl)) {
                     //弹出加载进度框
-//                    LoadingDialog loadingDialog = DialogHelper.loadDialog(view, "加载中...");
-                    getRemoteDir(smbFile.getParent());
+                    LoadingDialog loadingDialog = DialogHelper.loadDialog(this, "加载中...");
+                    getRemoteDir(smbFile.getParent(), new IProgressListener() {
+                        @Override
+                        public void onComplete() {
+                            loadingDialog.dismiss();
+                        }
+
+                        @Override
+                        public void onStart() {
+
+                        }
+                    });
                 }
 //                    Rxzmvvm.toastShow("已经是顶级目录了");
             } else { //点击目录进入到子目录
                 //弹出加载进度框
-//                LoadingDialog loadingDialog = DialogHelper.loadDialog(view, "加载中...");
-                getRemoteDir(subFiles[file.getIndex()].getPath());
+                LoadingDialog loadingDialog = DialogHelper.loadDialog(this, "加载中...");
+                getRemoteDir(subFiles[file.getIndex()].getPath(), new IProgressListener() {
+                    @Override
+                    public void onComplete() {
+                        loadingDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onStart() {
+
+                    }
+                });
             }
         } else {
-            //点击文件,弹出选项框
-//            DialogHelper.bottomDialog(view, file.getName(),
-//                    new DialogHelper.SubItem("下载", (w1) -> {
-//
-//
-//                        //弹出下载进度框
-//                        LoadingDialog loadingDialog = DialogHelper.loadDialog(view, "下载中...");
-//
-//                        java.io.File myRoot = new java.io.File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "smbClient");
-//                        if (!myRoot.exists()) {
-//                            boolean re = myRoot.mkdirs();
-//                            System.out.println(re);
-//                        }
-//
-//
-//                        new Thread(() -> {
-//                            try (SmbFileInputStream fi = new SmbFileInputStream(subFiles[file.getIndex()]);
-//                                 FileOutputStream fo = new FileOutputStream(new java.io.File(myRoot, file.getName()))) {
-//
-//                                IOUtils.copy(fi, fo);
-//                                subFiles[file.getIndex()].close();
-//                                view.runOnUiThread(() -> Rxzmvvm.toastShow("下载成功:" + myRoot.getPath() + file.getName()));
-//                            } catch (Exception e) {
-//
+            DialogHelper.bottomDialog(this, file.getFileName(),
+                    new DialogHelper.SubItem("下载", (w1) -> {
+                        //弹出下载进度框
+                        LoadingDialog loadingDialog = DialogHelper.loadDialog(BrowseActivity.this, "下载中...");
+
+                        File myRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "smbClient");
+                        if (!myRoot.exists()) {
+                            boolean re = myRoot.mkdirs();
+                            ALog.getInstance().d(re + "");
+                        }
+                        new Thread(() -> {
+                            try (SmbFileInputStream fi = new SmbFileInputStream(subFiles[file.getIndex()]);
+                                 FileOutputStream fo = new FileOutputStream(new File(myRoot, file.getFileName()))) {
+                                IOUtils.copy(fi, fo);
+                                subFiles[file.getIndex()].close();
+                                ALog.getInstance().d("download success");
+//                                view.runOnUiThread(() -> Rxzmvvm.toastShow("下载成功:" + myRoot.getPath() + file.getFileName()));
+                            } catch (Exception e) {
+                                ALog.getInstance().d("download fail:" + e.toString());
 //                                view.runOnUiThread(() -> Rxzmvvm.toastShow("下载失败"));
-//                            } finally {
-//                                loadingDialog.dismiss();
-//                            }
-//                        }).start();
-//
-//
-//                    }),
+                            } finally {
+                                loadingDialog.dismiss();
+                            }
+                        }).start();
+
+                    }));
 //                    new DialogHelper.SubItem("删除", (w1) -> {
 //                        //打开确认弹出
 //                        DialogHelper.verifyDialog(view, "删除 " + file.getName(), () -> {
@@ -239,11 +296,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 //                                }
 //                            }).start();
 //                        });
-//
-//
 //                    }));
-
-
         }
     }
 }

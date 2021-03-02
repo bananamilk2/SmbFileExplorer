@@ -1,5 +1,6 @@
 package com.asjm.fileexplorer.holder;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 import android.widget.TextView;
 
@@ -9,11 +10,16 @@ import com.asjm.fileexplorer.databinding.ItemFileBinding;
 import com.asjm.fileexplorer.entity.FileSmb;
 import com.asjm.lib.util.ALog;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 public class FileViewHolder extends BaseViewHolder<FileSmb> {
 
     private TextView name;
     private TextView time;
     private ItemFileBinding itemFileBinding;
+    @SuppressLint("SimpleDateFormat")
+    public final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public FileViewHolder(View itemView) {
         super(itemView);
@@ -27,7 +33,7 @@ public class FileViewHolder extends BaseViewHolder<FileSmb> {
     @Override
     public void loadItemData(FileSmb data, int position) {
         itemFileBinding.name.setText(data.getFileName());
-        itemFileBinding.time.setText(data.getDownloadTime() + "");
+        itemFileBinding.time.setText(df.format(data.getFileTime()));
         if (data.isDir())
             itemFileBinding.type.setImageResource(R.drawable.ic_folder);
         else

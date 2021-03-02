@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -20,8 +21,10 @@ import com.asjm.fileexplorer.databinding.ActivityMainBinding;
 import com.asjm.fileexplorer.entity.Server;
 import com.asjm.fileexplorer.holder.ServerViewHolder;
 import com.asjm.fileexplorer.listener.OnItemClickListener;
+import com.asjm.fileexplorer.listener.OnPermissionCallBack;
 import com.asjm.fileexplorer.manager.DaoManager;
 import com.asjm.fileexplorer.utils.OSUtils;
+import com.asjm.fileexplorer.utils.PermissionHelper;
 import com.asjm.fileexplorer.utils.SystemBarTintManager;
 import com.asjm.lib.util.ALog;
 
@@ -30,7 +33,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements OnItemClickListener<Server> {
+public class MainActivity extends AppCompatActivity implements OnItemClickListener<Server>, OnPermissionCallBack {
 
     private List<Server> serverList = new ArrayList<>();
     private ActivityMainBinding activityMainBinding;
@@ -55,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         adapter = new BaseRecycleAdapter<>(serverList, R.layout.item_link, ServerViewHolder.class);
         activityMainBinding.recycler.setAdapter(adapter);
         adapter.setOnItemClickListener(this);
+
+        PermissionHelper.requestPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, this);
+        PermissionHelper.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, this);
     }
 
     @Override
@@ -257,5 +263,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         Bundle bundle = new Bundle();
         bundle.putSerializable("server", data);
         turnTo(this, BrowseActivity.class, bundle, true);
+    }
+
+    @Override
+    public void success() {
+        ALog.getInstance().d("success");
     }
 }

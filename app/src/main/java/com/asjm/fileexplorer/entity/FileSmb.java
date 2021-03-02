@@ -119,4 +119,20 @@ public class FileSmb {
     public boolean getDir() {
         return this.dir;
     }
+
+    @Override
+    public String toString() {
+        return "FileSmb{" +
+                "id=" + id +
+                ", index=" + index +
+                ", fileHash='" + fileHash + '\'' +
+                ", fileSource='" + fileSource + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", fileSize=" + fileSize +
+                ", fileTime=" + fileTime +
+                ", downloadTime=" + downloadTime +
+                ", dir=" + dir +
+                ", fileType=" + fileType +
+                '}';
+    }
 }
