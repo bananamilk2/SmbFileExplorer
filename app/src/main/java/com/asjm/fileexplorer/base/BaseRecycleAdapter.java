@@ -45,18 +45,12 @@ public class BaseRecycleAdapter<T, V extends BaseViewHolder<T>> extends Recycler
         holder.setData(t);
         holder.loadItemData(t, position);
         if (this.onItemClickListener != null) {
-            holder.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onItemClickListener.onItemClick(t, view, position);
-                }
-            });
+            holder.setOnClickListener(view -> onItemClickListener.onItemClick(t, view, position));
         }
     }
 
     @Override
     public int getItemViewType(int position) {
-        ALog.getInstance().d("getItemViewType " + position);
         return super.getItemViewType(position);
     }
 

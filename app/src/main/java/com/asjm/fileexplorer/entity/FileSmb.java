@@ -9,9 +9,12 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Property;
 
 @Entity(nameInDb = "tableFiles")
-public class File {
+public class FileSmb {
     @Id(autoincrement = true)
     private Long id;
+
+    @Property
+    private int index;
 
     @Index(unique = true)
     private String fileHash;
@@ -30,11 +33,13 @@ public class File {
     private boolean dir;
     @Property
     private int fileType;
-    @Generated(hash = 1376624129)
-    public File(Long id, String fileHash, String fileSource, String fileName,
-            Long fileSize, Date fileTime, Date downloadTime, boolean dir,
-            int fileType) {
+
+    @Generated(hash = 1924370362)
+    public FileSmb(Long id, int index, String fileHash, String fileSource,
+            String fileName, Long fileSize, Date fileTime, Date downloadTime,
+            boolean dir, int fileType) {
         this.id = id;
+        this.index = index;
         this.fileHash = fileHash;
         this.fileSource = fileSource;
         this.fileName = fileName;
@@ -44,8 +49,9 @@ public class File {
         this.dir = dir;
         this.fileType = fileType;
     }
-    @Generated(hash = 375897388)
-    public File() {
+
+    @Generated(hash = 2141355914)
+    public FileSmb() {
     }
     public Long getId() {
         return this.id;
@@ -89,7 +95,7 @@ public class File {
     public void setDownloadTime(Date downloadTime) {
         this.downloadTime = downloadTime;
     }
-    public boolean getDir() {
+    public boolean isDir() {
         return this.dir;
     }
     public void setDir(boolean dir) {
@@ -100,5 +106,17 @@ public class File {
     }
     public void setFileType(int fileType) {
         this.fileType = fileType;
+    }
+
+    public int getIndex() {
+        return this.index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public boolean getDir() {
+        return this.dir;
     }
 }

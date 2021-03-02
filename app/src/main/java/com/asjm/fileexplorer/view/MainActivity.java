@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         activityMainBinding.recycler.setLayoutManager(layoutManager);
+
         adapter = new BaseRecycleAdapter<>(serverList, R.layout.item_link, ServerViewHolder.class);
         activityMainBinding.recycler.setAdapter(adapter);
         adapter.setOnItemClickListener(this);

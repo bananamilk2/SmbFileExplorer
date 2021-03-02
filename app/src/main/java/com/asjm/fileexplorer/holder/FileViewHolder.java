@@ -5,13 +5,15 @@ import android.widget.TextView;
 
 import com.asjm.fileexplorer.R;
 import com.asjm.fileexplorer.base.BaseViewHolder;
-import com.asjm.fileexplorer.entity.File;
+import com.asjm.fileexplorer.databinding.ItemFileBinding;
+import com.asjm.fileexplorer.entity.FileSmb;
 import com.asjm.lib.util.ALog;
 
-public class FileViewHolder extends BaseViewHolder<File> {
+public class FileViewHolder extends BaseViewHolder<FileSmb> {
 
     private TextView name;
     private TextView time;
+    private ItemFileBinding itemFileBinding;
 
     public FileViewHolder(View itemView) {
         super(itemView);
@@ -19,14 +21,16 @@ public class FileViewHolder extends BaseViewHolder<File> {
 
     @Override
     public void initView(View view) {
-        name = itemView.findViewById(R.id.name);
-        time = itemView.findViewById(R.id.time);
+        itemFileBinding = ItemFileBinding.bind(view);
     }
 
     @Override
-    public void loadItemData(File data, int position) {
-        this.name.setText(data.getFileName());
-        this.time.setText(data.getDownloadTime().toString());
-        ALog.getInstance().d("position = " + position + " ");
+    public void loadItemData(FileSmb data, int position) {
+        itemFileBinding.name.setText(data.getFileName());
+        itemFileBinding.time.setText(data.getDownloadTime() + "");
+        if (data.isDir())
+            itemFileBinding.type.setImageResource(R.drawable.ic_folder);
+        else
+            itemFileBinding.type.setImageResource(R.drawable.ic_file);
     }
 }
