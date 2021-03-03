@@ -1,3 +1,4 @@
+include ':lib'
 include ':demo'
 include ':app'
 rootProject.name = "FileExplorer"

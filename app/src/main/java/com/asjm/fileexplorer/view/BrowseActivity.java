@@ -1,6 +1,8 @@
 package com.asjm.fileexplorer.view;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.asjm.fileexplorer.R;
@@ -199,6 +202,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                     fileList.clear();
                     fileList.addAll(list);
                     runOnUiThread(() -> adapter.notifyDataSetChanged());
+
                 } else {
                     throw new Exception("这不是一个目录");
                 }
@@ -258,6 +262,25 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                         //弹出下载进度框
                         LoadingDialog loadingDialog = DialogHelper.loadDialog(BrowseActivity.this, "下载中...");
 
+                        int REQUEST_EXTERNAL_STORAGE = 1;
+                        String[] PERMISSIONS_STORAGE = {
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        };
+                        int permission = ActivityCompat.checkSelfPermission(BrowseActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+                        if (permission != PackageManager.PERMISSION_GRANTED) {
+                            // We don't have permission so prompt the user
+                            ActivityCompat.requestPermissions(
+                                    BrowseActivity.this,
+                                    PERMISSIONS_STORAGE,
+                                    REQUEST_EXTERNAL_STORAGE
+                            );
+                            ALog.getInstance().d("requestPermissions");
+                        } else
+                            ALog.getInstance().d("permission");
+
+
                         File myRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "smbClient");
                         if (!myRoot.exists()) {
                             boolean re = myRoot.mkdirs();
@@ -277,8 +300,9 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                                 loadingDialog.dismiss();
                             }
                         }).start();
-
                     }));
+
+
 //                    new DialogHelper.SubItem("删除", (w1) -> {
 //                        //打开确认弹出
 //                        DialogHelper.verifyDialog(view, "删除 " + file.getName(), () -> {
