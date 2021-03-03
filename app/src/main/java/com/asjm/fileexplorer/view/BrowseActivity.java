@@ -7,6 +7,9 @@ import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -36,11 +39,15 @@ import com.litesuits.common.io.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import hugo.weaving.DebugLog;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
@@ -55,6 +62,8 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
     private String baseUrl = "";        //保存根目录地址
     private SmbFile smbFile = null;     //当前目录
     private SmbFile[] subFiles = null;      //当前目录下的子文件、目录
+    private HandlerThread workThread;
+    private Handler workHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +79,10 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
         activityBrowseBinding.recycler.setAdapter(adapter);
 
         adapter.setOnItemClickListener(this);
+
+        workThread = new HandlerThread("browse_thread");
+        workThread.start();
+        workHandler = new Handler(workThread.getLooper());
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -137,18 +150,8 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 ALog.getInstance().d("getRemoteDir: " + url);
                 smbFile = new SmbFile(url);
 
-
+                ALog.getInstance().d("file count : " + smbFile.listFiles().length);
                 if (smbFile.isDirectory()) {
-                    ArrayList<FileSmb> list = new ArrayList<>();
-                    //添加返回上级目录
-
-                    FileSmb f = new FileSmb();
-                    f.setDir(true);
-                    f.setFileName("../");
-                    f.setIndex(-1);
-                    f.setFileTime(new Date());
-                    list.add(f);
-
                     subFiles = Arrays.stream(smbFile.listFiles()).filter((e) -> {
                         try {
                             if (e.exists())
@@ -175,33 +178,18 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                             })
                             .toArray(SmbFile[]::new);
 
-                    for (int i = 0; i < subFiles.length; i++) {
-                        SmbFile sf = subFiles[i];
-                        FileSmb fs = new FileSmb();
-                        fs.setIndex(i);
-                        fs.setFileName(sf.getName());
-                        Date time = new Date(sf.createTime());
-                        long l = sf.fileIndex();
-                        String canonicalPath = sf.getCanonicalPath();
-                        long contentLengthLong = sf.getContentLengthLong();
-                        long date = sf.getDate();
-                        String dfsPath = sf.getDfsPath();
-                        long diskFreeSpace = sf.getDiskFreeSpace();
-                        String path = sf.getPath();
-                        int type = sf.getType();
+                    ALog.getInstance().d("sort finish");
 
-                        fs.setFileTime(time);
-                        fs.setDir(sf.isDirectory());
-                        fs.setFileSize(contentLengthLong);
+                    List<FileSmb> fileSmbs = copyList(subFiles);
 
-                        list.add(fs);
-//                        ALog.getInstance().d("\n" + i + ", name = " + sf.getName() + ", createTime = " + time.toString()
-//                                + ", fileIndex = " + l + ", canonicalPath = " + canonicalPath + "\n"
-//                                + ", contentLengthLong = " + contentLengthLong +"  " + FileUtil.formatFileSize(contentLengthLong) + ", ");
-                    }
+                    ALog.getInstance().d("finish " + fileSmbs.size());
                     fileList.clear();
-                    fileList.addAll(list);
-                    runOnUiThread(() -> adapter.notifyDataSetChanged());
+                    fileList.addAll(fileSmbs);
+//                    Collections.addAll(fileList, subFiles);
+                    runOnUiThread(() -> {
+                        adapter.notifyDataSetChanged();
+                        activityBrowseBinding.recycler.scrollToPosition(0);
+                    });
 
                 } else {
                     throw new Exception("这不是一个目录");
@@ -213,6 +201,49 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                     runOnUiThread(listener::onComplete);
             }
         }).start();
+    }
+
+    @DebugLog
+    private List<FileSmb> copyList(SmbFile[] subFiles) {
+        ALog.getInstance().e("copylist");
+        long start = System.currentTimeMillis();
+        ArrayList<FileSmb> list = new ArrayList<>();
+        FileSmb f = new FileSmb();
+        f.setDir(true);
+        f.setFileName("../");
+        f.setIndex(-1);
+        f.setFileTime(new Date());
+        f.setFileSize(0l);
+        list.add(f);
+        try {
+            for (int i = 0; i < subFiles.length; i++) {
+                SmbFile sf = subFiles[i];
+                FileSmb fs = new FileSmb();
+
+                fs.setIndex(i);
+                fs.setFileName(sf.getName());
+//
+                Date time = new Date(sf.createTime());
+                fs.setFileTime(time);
+
+                long date = sf.getDate();
+
+                String canonicalPath = sf.getCanonicalPath();
+                String dfsPath = sf.getDfsPath();
+                String path = sf.getPath();
+                int type = sf.getType();
+
+                fs.setDir(sf.isDirectory());
+
+                long contentLengthLong = sf.getContentLengthLong();
+                fs.setFileSize(contentLengthLong);
+                list.add(fs);
+            }
+        } catch (Exception e) {
+            ALog.getInstance().e(e.toString());
+        }
+        ALog.getInstance().i("time = " + (System.currentTimeMillis() - start));
+        return list;
     }
 
     public void add(View view) {
@@ -227,7 +258,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 //将当前目录和根目录比较，如果相等则停止返回上一级
                 if (!smbFile.getPath().equals(baseUrl)) {
                     //弹出加载进度框
-                    LoadingDialog loadingDialog = DialogHelper.loadDialog(this, "加载中...");
+                    LoadingDialog loadingDialog = DialogHelper.loadDialog(BrowseActivity.this, "加载中...");
                     getRemoteDir(smbFile.getParent(), new IProgressListener() {
                         @Override
                         public void onComplete() {
@@ -243,7 +274,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 //                    Rxzmvvm.toastShow("已经是顶级目录了");
             } else { //点击目录进入到子目录
                 //弹出加载进度框
-                LoadingDialog loadingDialog = DialogHelper.loadDialog(this, "加载中...");
+                LoadingDialog loadingDialog = DialogHelper.loadDialog(BrowseActivity.this, "加载中...");
                 getRemoteDir(subFiles[file.getIndex()].getPath(), new IProgressListener() {
                     @Override
                     public void onComplete() {
@@ -257,7 +288,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 });
             }
         } else {
-            DialogHelper.bottomDialog(this, file.getFileName(),
+            DialogHelper.bottomDialog(BrowseActivity.this, file.getFileName(),
                     new DialogHelper.SubItem("下载", (w1) -> {
                         //弹出下载进度框
                         LoadingDialog loadingDialog = DialogHelper.loadDialog(BrowseActivity.this, "下载中...");

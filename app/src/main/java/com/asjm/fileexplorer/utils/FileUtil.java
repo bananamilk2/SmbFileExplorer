@@ -31,6 +31,6 @@ public class FileUtil {
             return String.format("%.2fT", teraByte);
         }
 
-        return "0K";
+        return "";
     }
 }

@@ -91,6 +91,8 @@
                         android:onClick="add"
                         android:layout_height="wrap_content"
                         android:letterSpacing="0.1"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/button_primary"
                         android:text="添加新链接" />
 
                 </LinearLayout>
