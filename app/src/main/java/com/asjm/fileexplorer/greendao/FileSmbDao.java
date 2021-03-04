@@ -26,14 +26,15 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Index = new Property(1, int.class, "index", false, "INDEX");
-        public final static Property FileHash = new Property(2, String.class, "fileHash", false, "FILE_HASH");
+        public final static Property Hash = new Property(2, String.class, "hash", false, "HASH");
         public final static Property FileSource = new Property(3, String.class, "fileSource", false, "FILE_SOURCE");
-        public final static Property FileName = new Property(4, String.class, "fileName", false, "FILE_NAME");
-        public final static Property FileSize = new Property(5, Long.class, "fileSize", false, "FILE_SIZE");
-        public final static Property FileTime = new Property(6, java.util.Date.class, "fileTime", false, "FILE_TIME");
+        public final static Property Name = new Property(4, String.class, "name", false, "NAME");
+        public final static Property Size = new Property(5, Long.class, "size", false, "SIZE");
+        public final static Property Date = new Property(6, Long.class, "date", false, "DATE");
         public final static Property DownloadTime = new Property(7, java.util.Date.class, "downloadTime", false, "DOWNLOAD_TIME");
         public final static Property Dir = new Property(8, boolean.class, "dir", false, "DIR");
-        public final static Property FileType = new Property(9, int.class, "fileType", false, "FILE_TYPE");
+        public final static Property Type = new Property(9, int.class, "type", false, "TYPE");
+        public final static Property Path = new Property(10, String.class, "path", false, "PATH");
     }
 
 
@@ -51,17 +52,18 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"tableFiles\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "\"INDEX\" INTEGER NOT NULL ," + // 1: index
-                "\"FILE_HASH\" TEXT," + // 2: fileHash
+                "\"HASH\" TEXT," + // 2: hash
                 "\"FILE_SOURCE\" TEXT," + // 3: fileSource
-                "\"FILE_NAME\" TEXT," + // 4: fileName
-                "\"FILE_SIZE\" INTEGER," + // 5: fileSize
-                "\"FILE_TIME\" INTEGER," + // 6: fileTime
+                "\"NAME\" TEXT," + // 4: name
+                "\"SIZE\" INTEGER," + // 5: size
+                "\"DATE\" INTEGER," + // 6: date
                 "\"DOWNLOAD_TIME\" INTEGER," + // 7: downloadTime
                 "\"DIR\" INTEGER NOT NULL ," + // 8: dir
-                "\"FILE_TYPE\" INTEGER NOT NULL );"); // 9: fileType
+                "\"TYPE\" INTEGER NOT NULL ," + // 9: type
+                "\"PATH\" TEXT);"); // 10: path
         // Add Indexes
-        db.execSQL("CREATE UNIQUE INDEX " + constraint + "IDX_tableFiles_FILE_HASH ON \"tableFiles\"" +
-                " (\"FILE_HASH\" ASC);");
+        db.execSQL("CREATE UNIQUE INDEX " + constraint + "IDX_tableFiles_HASH ON \"tableFiles\"" +
+                " (\"HASH\" ASC);");
     }
 
     /** Drops the underlying database table. */
@@ -80,9 +82,9 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
         }
         stmt.bindLong(2, entity.getIndex());
  
-        String fileHash = entity.getFileHash();
-        if (fileHash != null) {
-            stmt.bindString(3, fileHash);
+        String hash = entity.getHash();
+        if (hash != null) {
+            stmt.bindString(3, hash);
         }
  
         String fileSource = entity.getFileSource();
@@ -90,19 +92,19 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
             stmt.bindString(4, fileSource);
         }
  
-        String fileName = entity.getFileName();
-        if (fileName != null) {
-            stmt.bindString(5, fileName);
+        String name = entity.getName();
+        if (name != null) {
+            stmt.bindString(5, name);
         }
  
-        Long fileSize = entity.getFileSize();
-        if (fileSize != null) {
-            stmt.bindLong(6, fileSize);
+        Long size = entity.getSize();
+        if (size != null) {
+            stmt.bindLong(6, size);
         }
  
-        java.util.Date fileTime = entity.getFileTime();
-        if (fileTime != null) {
-            stmt.bindLong(7, fileTime.getTime());
+        Long date = entity.getDate();
+        if (date != null) {
+            stmt.bindLong(7, date);
         }
  
         java.util.Date downloadTime = entity.getDownloadTime();
@@ -110,7 +112,12 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
             stmt.bindLong(8, downloadTime.getTime());
         }
         stmt.bindLong(9, entity.getDir() ? 1L: 0L);
-        stmt.bindLong(10, entity.getFileType());
+        stmt.bindLong(10, entity.getType());
+ 
+        String path = entity.getPath();
+        if (path != null) {
+            stmt.bindString(11, path);
+        }
     }
 
     @Override
@@ -123,9 +130,9 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
         }
         stmt.bindLong(2, entity.getIndex());
  
-        String fileHash = entity.getFileHash();
-        if (fileHash != null) {
-            stmt.bindString(3, fileHash);
+        String hash = entity.getHash();
+        if (hash != null) {
+            stmt.bindString(3, hash);
         }
  
         String fileSource = entity.getFileSource();
@@ -133,19 +140,19 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
             stmt.bindString(4, fileSource);
         }
  
-        String fileName = entity.getFileName();
-        if (fileName != null) {
-            stmt.bindString(5, fileName);
+        String name = entity.getName();
+        if (name != null) {
+            stmt.bindString(5, name);
         }
  
-        Long fileSize = entity.getFileSize();
-        if (fileSize != null) {
-            stmt.bindLong(6, fileSize);
+        Long size = entity.getSize();
+        if (size != null) {
+            stmt.bindLong(6, size);
         }
  
-        java.util.Date fileTime = entity.getFileTime();
-        if (fileTime != null) {
-            stmt.bindLong(7, fileTime.getTime());
+        Long date = entity.getDate();
+        if (date != null) {
+            stmt.bindLong(7, date);
         }
  
         java.util.Date downloadTime = entity.getDownloadTime();
@@ -153,7 +160,12 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
             stmt.bindLong(8, downloadTime.getTime());
         }
         stmt.bindLong(9, entity.getDir() ? 1L: 0L);
-        stmt.bindLong(10, entity.getFileType());
+        stmt.bindLong(10, entity.getType());
+ 
+        String path = entity.getPath();
+        if (path != null) {
+            stmt.bindString(11, path);
+        }
     }
 
     @Override
@@ -166,14 +178,15 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
         FileSmb entity = new FileSmb( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.getInt(offset + 1), // index
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // fileHash
+            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // hash
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // fileSource
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // fileName
-            cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5), // fileSize
-            cursor.isNull(offset + 6) ? null : new java.util.Date(cursor.getLong(offset + 6)), // fileTime
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // name
+            cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5), // size
+            cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6), // date
             cursor.isNull(offset + 7) ? null : new java.util.Date(cursor.getLong(offset + 7)), // downloadTime
             cursor.getShort(offset + 8) != 0, // dir
-            cursor.getInt(offset + 9) // fileType
+            cursor.getInt(offset + 9), // type
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10) // path
         );
         return entity;
     }
@@ -182,14 +195,15 @@ public class FileSmbDao extends AbstractDao<FileSmb, Long> {
     public void readEntity(Cursor cursor, FileSmb entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setIndex(cursor.getInt(offset + 1));
-        entity.setFileHash(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
+        entity.setHash(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setFileSource(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setFileName(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setFileSize(cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5));
-        entity.setFileTime(cursor.isNull(offset + 6) ? null : new java.util.Date(cursor.getLong(offset + 6)));
+        entity.setName(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setSize(cursor.isNull(offset + 5) ? null : cursor.getLong(offset + 5));
+        entity.setDate(cursor.isNull(offset + 6) ? null : cursor.getLong(offset + 6));
         entity.setDownloadTime(cursor.isNull(offset + 7) ? null : new java.util.Date(cursor.getLong(offset + 7)));
         entity.setDir(cursor.getShort(offset + 8) != 0);
-        entity.setFileType(cursor.getInt(offset + 9));
+        entity.setType(cursor.getInt(offset + 9));
+        entity.setPath(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
      }
     
     @Override

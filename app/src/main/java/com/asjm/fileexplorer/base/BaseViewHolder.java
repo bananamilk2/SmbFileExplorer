@@ -1,11 +1,10 @@
 package com.asjm.fileexplorer.base;
 
 import android.view.View;
+
 import androidx.recyclerview.widget.RecyclerView;
 
 public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
-
-    private int position;
 
     public BaseViewHolder(View itemView) {
         super(itemView);
@@ -24,5 +23,9 @@ public abstract class BaseViewHolder<T> extends RecyclerView.ViewHolder {
 
     public void setOnClickListener(View.OnClickListener listener) {
         itemView.setOnClickListener(listener);
+    }
+
+    public void setOnLongClickListener(View.OnLongClickListener listener) {
+        itemView.setOnLongClickListener(listener);
     }
 }

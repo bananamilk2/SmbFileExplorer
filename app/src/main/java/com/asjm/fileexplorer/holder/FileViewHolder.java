@@ -2,7 +2,6 @@ package com.asjm.fileexplorer.holder;
 
 import android.annotation.SuppressLint;
 import android.view.View;
-import android.widget.TextView;
 
 import com.asjm.fileexplorer.R;
 import com.asjm.fileexplorer.base.BaseViewHolder;
@@ -16,7 +15,8 @@ import java.text.SimpleDateFormat;
 
 public class FileViewHolder extends BaseViewHolder<FileSmb> {
 
-    private ItemFileBinding itemFileBinding;
+    private ItemFileBinding view;
+
     @SuppressLint("SimpleDateFormat")
     public final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -26,19 +26,20 @@ public class FileViewHolder extends BaseViewHolder<FileSmb> {
 
     @Override
     public void initView(View view) {
-        itemFileBinding = ItemFileBinding.bind(view);
+        this.view = ItemFileBinding.bind(view);
     }
 
     @Override
     public void loadItemData(FileSmb data, int position) {
-        itemFileBinding.name.setText(data.getFileName());
-        itemFileBinding.time.setText(df.format(data.getFileTime()));
-        itemFileBinding.size.setText(FileUtil.formatFileSize(data.getFileSize()));
+        view.name.setText(data.getName());
+        view.time.setText(df.format(data.getDate()));
+        view.size.setText(data.isDir() ? view.getRoot().getContext().getResources().getString(R.string.text_directory)
+                : FileUtil.formatFileSize(data.getSize()));
         try {
             if (data.isDir())
-                itemFileBinding.type.setImageResource(R.drawable.ic_folder);
+                view.type.setImageResource(R.drawable.ic_folder);
             else
-                itemFileBinding.type.setImageResource(R.drawable.ic_file);
+                view.type.setImageResource(R.drawable.ic_file);
         } catch (Exception e) {
             ALog.getInstance().e(e.toString());
         }

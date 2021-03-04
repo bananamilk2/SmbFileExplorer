@@ -5,6 +5,7 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
 
 import java.util.Date;
+
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Property;
 
@@ -17,95 +18,115 @@ public class FileSmb {
     private int index;
 
     @Index(unique = true)
-    private String fileHash;
+    private String hash;
 
     @Property
     private String fileSource;
     @Property
-    private String fileName;
+    private String name;
     @Property
-    private Long fileSize;
+    private Long size;
     @Property
-    private Date fileTime;
+    private Long date;
     @Property
     private Date downloadTime;
     @Property
     private boolean dir;
     @Property
-    private int fileType;
+    private int type;
+    @Property
+    private String path;
 
-    @Generated(hash = 1924370362)
-    public FileSmb(Long id, int index, String fileHash, String fileSource,
-            String fileName, Long fileSize, Date fileTime, Date downloadTime,
-            boolean dir, int fileType) {
-        this.id = id;
-        this.index = index;
-        this.fileHash = fileHash;
-        this.fileSource = fileSource;
-        this.fileName = fileName;
-        this.fileSize = fileSize;
-        this.fileTime = fileTime;
-        this.downloadTime = downloadTime;
-        this.dir = dir;
-        this.fileType = fileType;
-    }
-
-    @Generated(hash = 2141355914)
     public FileSmb() {
     }
+
+    @Generated(hash = 951967118)
+    public FileSmb(Long id, int index, String hash, String fileSource, String name,
+            Long size, Long date, Date downloadTime, boolean dir, int type,
+            String path) {
+        this.id = id;
+        this.index = index;
+        this.hash = hash;
+        this.fileSource = fileSource;
+        this.name = name;
+        this.size = size;
+        this.date = date;
+        this.downloadTime = downloadTime;
+        this.dir = dir;
+        this.type = type;
+        this.path = path;
+    }
+
     public Long getId() {
         return this.id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
-    public String getFileHash() {
-        return this.fileHash;
+
+    public String getHash() {
+        return this.hash;
     }
-    public void setFileHash(String fileHash) {
-        this.fileHash = fileHash;
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
+
     public String getFileSource() {
         return this.fileSource;
     }
+
     public void setFileSource(String fileSource) {
         this.fileSource = fileSource;
     }
-    public String getFileName() {
-        return this.fileName;
+
+    public String getName() {
+        return this.name;
     }
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+
+    public void setName(String name) {
+        this.name = name;
     }
-    public Long getFileSize() {
-        return this.fileSize;
+
+    public Long getSize() {
+        return this.size;
     }
-    public void setFileSize(Long fileSize) {
-        this.fileSize = fileSize;
+
+    public void setSize(Long size) {
+        this.size = size;
     }
-    public Date getFileTime() {
-        return this.fileTime;
+
+    public Long getDate() {
+        return this.date;
     }
-    public void setFileTime(Date fileTime) {
-        this.fileTime = fileTime;
+
+    public void setDate(Long date) {
+        this.date = date;
     }
+
     public Date getDownloadTime() {
         return this.downloadTime;
     }
+
     public void setDownloadTime(Date downloadTime) {
         this.downloadTime = downloadTime;
     }
+
     public boolean isDir() {
         return this.dir;
     }
+
     public void setDir(boolean dir) {
         this.dir = dir;
     }
-    public int getFileType() {
-        return this.fileType;
+
+    public int getType() {
+        return this.type;
     }
-    public void setFileType(int fileType) {
-        this.fileType = fileType;
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public int getIndex() {
@@ -116,23 +137,31 @@ public class FileSmb {
         this.index = index;
     }
 
-    public boolean getDir() {
-        return this.dir;
-    }
-
     @Override
     public String toString() {
         return "FileSmb{" +
                 "id=" + id +
                 ", index=" + index +
-                ", fileHash='" + fileHash + '\'' +
+                ", hash='" + hash + '\'' +
                 ", fileSource='" + fileSource + '\'' +
-                ", fileName='" + fileName + '\'' +
-                ", fileSize=" + fileSize +
-                ", fileTime=" + fileTime +
+                ", name='" + name + '\'' +
+                ", size=" + size +
+                ", date=" + date +
                 ", downloadTime=" + downloadTime +
                 ", dir=" + dir +
-                ", fileType=" + fileType +
+                ", type=" + type +
                 '}';
+    }
+
+    public boolean getDir() {
+        return this.dir;
+    }
+
+    public String getPath() {
+        return this.path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

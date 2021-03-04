@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.asjm.fileexplorer.listener.OnItemClickListener;
+import com.asjm.fileexplorer.listener.OnItemLongClickListener;
 import com.asjm.lib.util.ALog;
 
 import java.lang.reflect.Constructor;
@@ -18,6 +19,7 @@ public class BaseRecycleAdapter<T, V extends BaseViewHolder<T>> extends Recycler
     private int layoutId;
     private Class<V> clazz;
     private OnItemClickListener<T> onItemClickListener;
+    private OnItemLongClickListener<T> onItemLongClickListener;
 
     public BaseRecycleAdapter(List<T> list, int layout, Class<V> cClass) {
         this.dataList = list;
@@ -47,6 +49,10 @@ public class BaseRecycleAdapter<T, V extends BaseViewHolder<T>> extends Recycler
         if (this.onItemClickListener != null) {
             holder.setOnClickListener(view -> onItemClickListener.onItemClick(t, view, position));
         }
+
+        if (this.onItemLongClickListener != null) {
+            holder.setOnLongClickListener(view -> onItemLongClickListener.onItemLongClick(t, view, position));
+        }
     }
 
     @Override
@@ -63,4 +69,7 @@ public class BaseRecycleAdapter<T, V extends BaseViewHolder<T>> extends Recycler
         this.onItemClickListener = onItemClickListener;
     }
 
+    public void setOnItemLongClickListener(OnItemLongClickListener<T> onItemClickListener) {
+        this.onItemLongClickListener = onItemClickListener;
+    }
 }

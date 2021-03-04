@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FileExplorer</string>
+    <string name="text_directory">文件夹</string>
 </resources>

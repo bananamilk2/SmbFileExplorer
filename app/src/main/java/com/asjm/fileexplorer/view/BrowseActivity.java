@@ -4,22 +4,15 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.AnimationDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.asjm.fileexplorer.R;
 import com.asjm.fileexplorer.base.BaseRecycleAdapter;
@@ -29,13 +22,12 @@ import com.asjm.fileexplorer.entity.Server;
 import com.asjm.fileexplorer.holder.FileViewHolder;
 import com.asjm.fileexplorer.listener.IProgressListener;
 import com.asjm.fileexplorer.listener.OnItemClickListener;
+import com.asjm.fileexplorer.listener.OnItemLongClickListener;
 import com.asjm.fileexplorer.utils.DialogHelper;
-import com.asjm.fileexplorer.utils.FileUtil;
 import com.asjm.lib.util.ALog;
 import com.hb.dialog.dialog.LoadingDialog;
 import com.hb.dialog.myDialog.MyImageMsgDialog;
 import com.litesuits.common.io.IOUtils;
-//import com.litesuits.common.io.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,16 +35,22 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import hugo.weaving.DebugLog;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 
-public class BrowseActivity extends AppCompatActivity implements OnItemClickListener<FileSmb> {
+//import com.litesuits.common.io.IOUtils;
+
+public class BrowseActivity extends AppCompatActivity implements OnItemClickListener<FileSmb>, OnItemLongClickListener<FileSmb> {
 
     private ActivityBrowseBinding activityBrowseBinding;
     private Server server;
@@ -79,6 +77,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
         activityBrowseBinding.recycler.setAdapter(adapter);
 
         adapter.setOnItemClickListener(this);
+        adapter.setOnItemLongClickListener(this);
 
         workThread = new HandlerThread("browse_thread");
         workThread.start();
@@ -150,7 +149,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 ALog.getInstance().d("getRemoteDir: " + url);
                 smbFile = new SmbFile(url);
 
-                ALog.getInstance().d("file count : " + smbFile.listFiles().length);
+                ALog.getInstance().d("file count : " + smbFile.listFiles().length + "  " + smbFile.isDirectory());
                 if (smbFile.isDirectory()) {
                     subFiles = Arrays.stream(smbFile.listFiles()).filter((e) -> {
                         try {
@@ -180,6 +179,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 
                     ALog.getInstance().d("sort finish");
 
+
                     List<FileSmb> fileSmbs = copyList(subFiles);
 
                     ALog.getInstance().d("finish " + fileSmbs.size());
@@ -205,38 +205,26 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 
     @DebugLog
     private List<FileSmb> copyList(SmbFile[] subFiles) {
-        ALog.getInstance().e("copylist");
+        ALog.getInstance().e("copylist : " + subFiles.length);
         long start = System.currentTimeMillis();
         ArrayList<FileSmb> list = new ArrayList<>();
         FileSmb f = new FileSmb();
         f.setDir(true);
-        f.setFileName("../");
+        f.setName("../");
         f.setIndex(-1);
-        f.setFileTime(new Date());
-        f.setFileSize(0l);
+        f.setDate(new Date().getTime());
+        f.setSize(0L);
         list.add(f);
         try {
             for (int i = 0; i < subFiles.length; i++) {
                 SmbFile sf = subFiles[i];
                 FileSmb fs = new FileSmb();
-
                 fs.setIndex(i);
-                fs.setFileName(sf.getName());
-//
-                Date time = new Date(sf.createTime());
-                fs.setFileTime(time);
-
-                long date = sf.getDate();
-
-                String canonicalPath = sf.getCanonicalPath();
-                String dfsPath = sf.getDfsPath();
-                String path = sf.getPath();
-                int type = sf.getType();
-
+                fs.setName(sf.getName());
+                fs.setDate(sf.getDate());
                 fs.setDir(sf.isDirectory());
-
-                long contentLengthLong = sf.getContentLengthLong();
-                fs.setFileSize(contentLengthLong);
+                fs.setSize(sf.getContentLengthLong());
+                fs.setPath(sf.getPath());
                 list.add(fs);
             }
         } catch (Exception e) {
@@ -244,6 +232,20 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
         }
         ALog.getInstance().i("time = " + (System.currentTimeMillis() - start));
         return list;
+    }
+
+    private void play(FileSmb file) {
+//        Intent intent = new Intent();
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        intent.setAction(android.content.Intent.ACTION_VIEW);
+//        intent.setDataAndType(Uri.parse(file.getPath()), "image/*");
+//        startActivity(intent);
+
+        Intent it = new Intent(Intent.ACTION_SEND);
+        it.putExtra(Intent.EXTRA_TEXT, "分享测试");
+        it.setType("text/plain");
+        startActivity(Intent.createChooser(it, "分享内容到"));
+
     }
 
     public void add(View view) {
@@ -288,7 +290,15 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 });
             }
         } else {
-            DialogHelper.bottomDialog(BrowseActivity.this, file.getFileName(),
+            play(file);
+        }
+    }
+
+    @Override
+    public boolean onItemLongClick(FileSmb file, View view, int position) {
+        ALog.getInstance().d("onItemLongClick: " + position);
+        if (!file.isDir()) {
+            DialogHelper.bottomDialog(BrowseActivity.this, file.getName(),
                     new DialogHelper.SubItem("下载", (w1) -> {
                         //弹出下载进度框
                         LoadingDialog loadingDialog = DialogHelper.loadDialog(BrowseActivity.this, "下载中...");
@@ -319,7 +329,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                         }
                         new Thread(() -> {
                             try (SmbFileInputStream fi = new SmbFileInputStream(subFiles[file.getIndex()]);
-                                 FileOutputStream fo = new FileOutputStream(new File(myRoot, file.getFileName()))) {
+                                 FileOutputStream fo = new FileOutputStream(new File(myRoot, file.getName()))) {
                                 IOUtils.copy(fi, fo);
                                 subFiles[file.getIndex()].close();
                                 ALog.getInstance().d("download success");
@@ -353,5 +363,6 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 //                        });
 //                    }));
         }
+        return true;
     }
 }
