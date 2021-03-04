@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 
 import com.asjm.fileexplorer.R;
@@ -31,6 +33,7 @@ import com.litesuits.common.io.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,10 +46,13 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import hugo.weaving.DebugLog;
+
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
+import jcifs.smb1.UniAddress;
+import jcifs.smb1.smb1.NtlmPasswordAuthentication;
+import jcifs.smb1.smb1.SmbSession;
 
 //import com.litesuits.common.io.IOUtils;
 
@@ -91,6 +97,33 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 ALog.getInstance().d(server.toString());
             }
         }
+
+//        String ip = "192.168.1.100";
+//        String username = "AFAP";
+//        String password = "123456";
+//        UniAddress mDomain = null;
+//        try {
+//            mDomain = UniAddress.getByName(ip);
+//            NtlmPasswordAuthentication mAuthentication = new NtlmPasswordAuthentication(ip, username, password);
+//            SmbSession.logon(mDomain, mAuthentication);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        String rootPath = "smb://" + ip + "/";
+//        SmbFile mRootFolder;
+//        if (mSpu.isAnonymous()) {
+//            mRootFolder = new SmbFile(rootPath);
+//        } else {
+//            mRootFolder = new SmbFile(rootPath, mAuthentication);
+//        }
+//        try {
+//            SmbFile[] files;
+//            files = mRootFolder.listFiles();
+//            for (SmbFile smbfile : files) {
+//
+//            }
+//        } catch (SmbException e) {
+//        }
 
         //组合链接
         StringBuilder baseUrlBuilder = new StringBuilder("smb://");
@@ -203,7 +236,6 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
         }).start();
     }
 
-    @DebugLog
     private List<FileSmb> copyList(SmbFile[] subFiles) {
         ALog.getInstance().e("copylist : " + subFiles.length);
         long start = System.currentTimeMillis();
@@ -241,11 +273,25 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 //        intent.setDataAndType(Uri.parse(file.getPath()), "image/*");
 //        startActivity(intent);
 
-        Intent it = new Intent(Intent.ACTION_SEND);
-        it.putExtra(Intent.EXTRA_TEXT, "分享测试");
-        it.setType("text/plain");
-        startActivity(Intent.createChooser(it, "分享内容到"));
+//        Intent it = new Intent(Intent.ACTION_SEND);
+//        it.putExtra(Intent.EXTRA_TEXT, "分享测试");
+//        it.setType("text/plain");
+//        startActivity(Intent.createChooser(it, "分享内容到"));
 
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        Uri uri = Uri.parse(Environment.getExternalStorageState() + "/Music/林俊杰 - 编号89757/一千年以前 - 林俊杰.mp3");
+        Uri uri = Uri.parse("http://192.168.0.1/2.mp3");
+//        intent.addCategory(Intent.CATEGORY_APP_MUSIC);
+        intent.setDataAndType(uri, "audio/*");
+        startActivity(intent);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        ALog.getInstance().d(requestCode + " " + resultCode + " " + data.getExtras());
     }
 
     public void add(View view) {

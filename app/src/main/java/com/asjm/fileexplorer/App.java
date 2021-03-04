@@ -17,6 +17,10 @@ public class App extends Application {
         DaoManager.getInstance().init(this);
         ALog.getInstance().init(this).setLogLevel(ALog.LOG_LEVEL_VERBOSE);
         ALog.getInstance().d(isApkInDebug(this));
+
+        System.setProperty("jcifs.smb.client.dfs.disabled", "true");
+        System.setProperty("jcifs.smb.client.soTimeout", "1000000");
+        System.setProperty("jcifs.smb.client.responseTimeout", "30000");
     }
 
     public static boolean isApkInDebug(Context context) {

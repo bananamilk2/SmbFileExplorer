@@ -79,7 +79,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     public void add(View view) {
-        turnTo(this, ServerEditActivity.class, null, true);
+//        turnTo(this, ServerEditActivity.class, null, true);
+        Intent i = new Intent();
+        i.setAction("com.asjm.action.editlink");
+        startActivity(i);
     }
 
     public void openMenu(View view) {
