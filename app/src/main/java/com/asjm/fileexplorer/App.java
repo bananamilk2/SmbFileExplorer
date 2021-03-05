@@ -3,12 +3,10 @@ package com.asjm.fileexplorer;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.os.Build;
 
 import com.asjm.fileexplorer.manager.DaoManager;
 import com.asjm.lib.util.ALog;
 
-import hugo.weaving.internal.Hugo;
 
 public class App extends Application {
     @Override

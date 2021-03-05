@@ -8,6 +8,7 @@ import android.widget.ListView;
 
 import androidx.fragment.app.ListFragment;
 
+import com.asjm.lib.util.ALog;
 import com.czbix.smbsteamer.dao.ServerDao;
 import com.czbix.smbsteamer.dao.model.Server;
 import com.czbix.smbsteamer.ui.adapter.ServerAdapter;
@@ -32,13 +33,12 @@ public class ServerListFragment extends ListFragment {
         return new ServerListFragment();
     }
 
-    public ServerListFragment() {
+    private ServerListFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         loadServers();
     }
 
@@ -47,6 +47,7 @@ public class ServerListFragment extends ListFragment {
     }
 
     private void loadServers() {
+        ALog.getInstance().d("loadServers");
         if (mTask != null) {
             mTask.cancel(false);
         }

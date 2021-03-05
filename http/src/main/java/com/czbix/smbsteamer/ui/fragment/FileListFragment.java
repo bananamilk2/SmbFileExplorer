@@ -65,7 +65,7 @@ public class FileListFragment extends ListFragment {
 
     private void initRoot(Server server) {
         try {
-            SmbFile smbFile = new SmbFile("smb://192.168.2.200/");
+            SmbFile smbFile = new SmbFile("smb://192.168.199.101/");
             final SmbFileItem smbFileItem;
             try {
                 smbFileItem = new SmbFileItem(smbFile, true);

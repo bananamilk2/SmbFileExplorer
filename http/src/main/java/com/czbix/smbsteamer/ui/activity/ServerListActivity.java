@@ -7,6 +7,7 @@ import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.asjm.lib.util.ALog;
 import com.czbix.smbsteamer.BuildConfig;
 import com.czbix.smbsteamer.R;
 import com.czbix.smbsteamer.dao.ServerDao;
@@ -21,14 +22,12 @@ public class ServerListActivity extends AppCompatActivity implements ServerListF
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mFragment = ServerListFragment.newInstance();
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, mFragment).commit();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_server, menu);
         return true;
     }
@@ -38,8 +37,23 @@ public class ServerListActivity extends AppCompatActivity implements ServerListF
         switch (item.getItemId()) {
             case R.id.action_settings:
                 if (BuildConfig.DEBUG) {
-                    // TODO: remove test code
-                    final Server server = new Server("192.168.1.1", "media", null, Credential.ANONYMOUS);
+                    ALog.getInstance().d("settings");
+                    final Server server = new Server("192.168.199.101", "share", null, new Credential() {
+                        @Override
+                        public boolean isAnonymous() {
+                            return false;
+                        }
+
+                        @Override
+                        protected String getUsername() {
+                            return "howard";
+                        }
+
+                        @Override
+                        protected String getPassword() {
+                            return "159357";
+                        }
+                    });
                     onServerClick(server);
                 }
                 return true;

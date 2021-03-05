@@ -17,7 +17,7 @@ public class FileListActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //noinspection ConstantConditions
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mFragment = FileListFragment.newInstance(getIntent().getExtras());
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, mFragment).commit();
