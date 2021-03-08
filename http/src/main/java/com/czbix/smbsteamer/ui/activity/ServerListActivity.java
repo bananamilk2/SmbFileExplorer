@@ -1,6 +1,7 @@
 package com.czbix.smbsteamer.ui.activity;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -70,7 +71,6 @@ public class ServerListActivity extends AppCompatActivity implements ServerListF
     public void onServerClick(Server server) {
         final Intent intent = new Intent(this, FileListActivity.class);
         intent.putExtra(FileListActivity.ARG_SERVER, server);
-
         startActivity(intent);
     }
 

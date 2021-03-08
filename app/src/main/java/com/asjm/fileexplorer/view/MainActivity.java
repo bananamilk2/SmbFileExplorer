@@ -1,19 +1,20 @@
 package com.asjm.fileexplorer.view;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.asjm.fileexplorer.R;
 import com.asjm.fileexplorer.base.BaseRecycleAdapter;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     private void onShow() {
         ALog.getInstance().d("onShow");
+        //TODO async
         List<Server> list = DaoManager.getInstance().getDaoSession().getServerDao().loadAll();
         ALog.getInstance().d("list size = " + list.size());
         serverList.clear();
@@ -79,10 +81,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
     public void add(View view) {
-//        turnTo(this, ServerEditActivity.class, null, true);
-        Intent i = new Intent();
-        i.setAction("com.asjm.action.editlink");
-        startActivity(i);
+        turnTo(this, ServerEditActivity.class, null, true);
     }
 
     public void openMenu(View view) {
@@ -111,7 +110,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         if (bundle != null)
             intent.putExtra("extra", bundle);
         if (isNeedReturn) {
-
             activity.startActivityForResult(intent, 0);
         } else {
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

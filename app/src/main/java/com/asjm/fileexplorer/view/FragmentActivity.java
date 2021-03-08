@@ -13,9 +13,10 @@ import com.asjm.lib.util.ALog;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.ListFragment;
 
-public class FragmentActivity extends AppCompatActivity implements AddServerDialog.Listener {
+public class FragmentActivity extends AppCompatActivity implements AddServerDialog.Listener, ServerListFragment.Listener {
 
     private ListFragment listFragment;
 
@@ -57,5 +58,10 @@ public class FragmentActivity extends AppCompatActivity implements AddServerDial
     @Override
     public void onAdd(Server server) {
         ALog.getInstance().d("onAdd");
+    }
+
+    @Override
+    public void onServerClick(Server server) {
+        ALog.getInstance().d("onServerClick: " + server.toString());
     }
 }

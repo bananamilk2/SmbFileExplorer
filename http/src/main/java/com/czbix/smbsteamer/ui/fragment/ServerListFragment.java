@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.concurrent.FutureTask;
 
 /**
  * A fragment representing a list of Items.
@@ -56,7 +57,7 @@ public class ServerListFragment extends ListFragment {
             @Override
             protected List<Server> doInBackground(Void... params) {
                 final Server server = ServerDao.getServer();
-
+                ALog.getInstance().d("");
                 if (server == null) {
                     return ImmutableList.of();
                 }
@@ -65,6 +66,7 @@ public class ServerListFragment extends ListFragment {
 
             @Override
             protected void onPostExecute(List<Server> servers) {
+                ALog.getInstance().d("");
                 if (mAdapter == null) {
                     mAdapter = new ServerAdapter(getActivity(), Lists.newArrayList(servers));
                     setListAdapter(mAdapter);

@@ -14,19 +14,16 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.ListFragment;
 
+import com.asjm.fileexplorer.entity.FileSmb;
 import com.asjm.fileexplorer.entity.Server;
 import com.asjm.fileexplorer.manager.DaoManager;
 import com.asjm.fileexplorer.ui.adapter.ServerAdapter;
 import com.asjm.lib.util.ALog;
-import com.google.common.collect.Lists;
 
 import java.util.List;
 
-public class ServerListFragment extends ListFragment {
-
-    private AsyncTask<Void, Void, List<Server>> task;
-    private Listener listener;
-    private List<Server> serverList;
+public class FileListFragment extends ListFragment {
+    private List<FileSmb> fileList;
     private BaseAdapter adapter;
 
     @Override
@@ -44,7 +41,6 @@ public class ServerListFragment extends ListFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         ALog.getInstance().d("onAttach");
-        listener = (Listener) context;
     }
 
     @Nullable
@@ -64,17 +60,11 @@ public class ServerListFragment extends ListFragment {
     public void onDestroyView() {
         super.onDestroyView();
         ALog.getInstance().d("onDestroyView");
-        if (task != null && task.getStatus() != AsyncTask.Status.FINISHED) {
-            task.cancel(false);
-        }
     }
 
     @Override
     public void onListItemClick(@NonNull ListView l, @NonNull View v, int position, long id) {
         ALog.getInstance().d("onListItemClick: " + position);
-        if (listener != null) {
-            listener.onServerClick((Server) getListAdapter().getItem(position));
-        }
     }
 
     @Override
@@ -93,9 +83,5 @@ public class ServerListFragment extends ListFragment {
     public void onDestroy() {
         super.onDestroy();
         ALog.getInstance().d("onDestroy");
-    }
-
-    public interface Listener {
-        void onServerClick(Server server);
     }
 }
