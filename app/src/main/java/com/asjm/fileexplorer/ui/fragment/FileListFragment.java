@@ -30,7 +30,7 @@ public class FileListFragment extends ListFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ALog.getInstance().d("onCreate");
-        serverList = DaoManager.getInstance().getDaoSession().getServerDao().loadAll();
+        List<Server> serverList = DaoManager.getInstance().getDaoSession().getServerDao().loadAll();
         ALog.getInstance().d("list size = " + serverList.size());
         adapter = new ServerAdapter(getActivity(), serverList);
         setListAdapter(adapter);
