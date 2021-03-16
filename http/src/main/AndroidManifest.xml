@@ -23,6 +23,11 @@
             android:name=".ui.activity.FileListActivity"
             android:label="@string/title_activity_file_list"
             android:parentActivityName=".ui.activity.ServerListActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <service

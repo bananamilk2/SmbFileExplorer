@@ -54,18 +54,18 @@ public class FileListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         final Bundle arguments = getArguments();
-        final Server server = arguments.getParcelable(ARG_SERVER);
+//        final Server server = arguments.getParcelable(ARG_SERVER);
 
         mAdapter = new FileAdapter(getActivity());
         setListAdapter(mAdapter);
 
         mHistory = new Stack<>();
-        initRoot(server);
+        initRoot(null);
     }
 
     private void initRoot(Server server) {
         try {
-            SmbFile smbFile = new SmbFile("smb://192.168.199.101/");
+            SmbFile smbFile = new SmbFile("smb://howard:159357@192.168.199.101");
             final SmbFileItem smbFileItem;
             try {
                 smbFileItem = new SmbFileItem(smbFile, true);
