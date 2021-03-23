@@ -1,9 +1,11 @@
 package com.asjm.fileexplorer.http;
 
 import com.asjm.fileexplorer.BuildConfig;
+import com.asjm.fileexplorer.utils.IOUtil;
 import com.asjm.fileexplorer.utils.SmbUtils;
 import com.asjm.lib.util.ALog;
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -65,19 +67,19 @@ public class HttpServer extends NanoHTTPD {
             long startFrom = 0;
             long endAt = -1;
             Set<String> strings = headers.keySet();
-            for(String key : strings)
+            for (String key : strings)
                 ALog.getInstance().d(key + " = " + headers.get(key));
             String range = headers.get("range");
-            if(range != null){
-                if(range.startsWith("bytes=")){
+            if (range != null) {
+                if (range.startsWith("bytes=")) {
                     range = range.substring("bytes=".length());
                     int minus = range.indexOf('-');
-                    try{
-                        if(minus > 0){
+                    try {
+                        if (minus > 0) {
                             startFrom = Long.parseLong(range.substring(0, minus));
                             endAt = Long.parseLong(range.substring(minus + 1));
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         ALog.getInstance().e(e.toString());
                     }
                 }
@@ -88,12 +90,52 @@ public class HttpServer extends NanoHTTPD {
             boolean headerIfNoneMatchPresentAndMatching = ifNoneMatch != null && (ifNoneMatch.equals("*") || ifNoneMatch.equals(etag));
             long fileLen = file.length();
             fis = file.getInputStream();
-//            if(headerIfRangeMissingOrMatching && range != null && startFrom)
-
+            if (headerIfRangeMissingOrMatching && range != null && startFrom >= 0 && startFrom < fileLen) {
+                if (headerIfNoneMatchPresentAndMatching) {
+                    res = newFixedLengthResponse(Response.Status.NOT_MODIFIED, contentType, "");
+                    res.addHeader("ETag", etag);
+                } else {
+                    if (endAt < 0) {
+                        endAt = fileLen - 1;
+                    }
+                    long newLen = endAt - startFrom + 1;
+                    if (newLen < 0) {
+                        newLen = 0;
+                    }
+                    ByteStreams.skipFully(fis, startFrom);
+                    res = newFixedLengthResponse(Response.Status.PARTIAL_CONTENT, contentType, fis, newLen);
+                    res.addHeader("Accept-Ranges", "bytes");
+                    res.addHeader("Content-Length", "" + newLen);
+                    res.addHeader("Content-Range", "bytes " + startFrom + "-" + endAt + "/" + fileLen);
+                    res.addHeader("ETag", etag);
+                }
+            } else {
+                if (headerIfRangeMissingOrMatching && range != null && startFrom >= fileLen) {
+                    res = newFixedLengthResponse(Response.Status.RANGE_NOT_SATISFIABLE, NanoHTTPD.MIME_PLAINTEXT, "");
+                    res.addHeader("Content-Range", "byte */*" + fileLen);
+                    res.addHeader("ETag", etag);
+                } else if (range == null && headerIfNoneMatchPresentAndMatching) {
+                    res = newFixedLengthResponse(Response.Status.NOT_MODIFIED, contentType, "");
+                    res.addHeader("ETag", etag);
+                } else if (!headerIfRangeMissingOrMatching && headerIfNoneMatchPresentAndMatching) {
+                    res = newFixedLengthResponse(Response.Status.NOT_MODIFIED, contentType, "");
+                    res.addHeader("ETag", etag);
+                } else {
+                    res = newFixedLengthResponse(Response.Status.OK, contentType, fis, fileLen);
+                    res.addHeader("Content-Length", Long.toString(fileLen));
+                    res.addHeader("ETag", etag);
+                }
+            }
+            success = true;
         } catch (Exception e) {
             ALog.getInstance().e(e.toString());
+            res = getForbiddenResponse();
+        }finally {
+            if(!success && fis != null){
+                IOUtil.closeQuietly(fis);
+            }
         }
-        return null;
+        return res;
     }
 
     protected Response getForbiddenResponse() {

@@ -10,10 +10,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 
 import com.asjm.fileexplorer.R;
@@ -22,10 +21,13 @@ import com.asjm.fileexplorer.databinding.ActivityBrowseBinding;
 import com.asjm.fileexplorer.entity.FileSmb;
 import com.asjm.fileexplorer.entity.Server;
 import com.asjm.fileexplorer.holder.FileViewHolder;
+import com.asjm.fileexplorer.http.HttpServer;
 import com.asjm.fileexplorer.listener.IProgressListener;
 import com.asjm.fileexplorer.listener.OnItemClickListener;
 import com.asjm.fileexplorer.listener.OnItemLongClickListener;
+import com.asjm.fileexplorer.service.StreamService;
 import com.asjm.fileexplorer.utils.DialogHelper;
+import com.asjm.fileexplorer.utils.SmbUtils;
 import com.asjm.lib.util.ALog;
 import com.hb.dialog.dialog.LoadingDialog;
 import com.hb.dialog.myDialog.MyImageMsgDialog;
@@ -33,34 +35,29 @@ import com.litesuits.common.io.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
-import jcifs.smb1.UniAddress;
-import jcifs.smb1.smb1.NtlmPasswordAuthentication;
-import jcifs.smb1.smb1.SmbSession;
-
-//import com.litesuits.common.io.IOUtils;
 
 public class BrowseActivity extends AppCompatActivity implements OnItemClickListener<FileSmb>, OnItemLongClickListener<FileSmb> {
 
     private ActivityBrowseBinding activityBrowseBinding;
     private Server server;
     private List<FileSmb> fileList = new ArrayList<>();
+    private Map<Integer, SmbFile> fileMap = new HashMap<>();
     private BaseRecycleAdapter<FileSmb, FileViewHolder> adapter;
 
     private String baseUrl = "";        //保存根目录地址
@@ -247,10 +244,12 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
         f.setDate(new Date().getTime());
         f.setSize(0L);
         list.add(f);
+
         try {
             for (int i = 0; i < subFiles.length; i++) {
                 SmbFile sf = subFiles[i];
                 FileSmb fs = new FileSmb();
+//                fs.setFile(sf);
                 fs.setIndex(i);
                 fs.setName(sf.getName());
                 fs.setDate(sf.getDate());
@@ -258,6 +257,8 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 fs.setSize(sf.getContentLengthLong());
                 fs.setPath(sf.getPath());
                 list.add(fs);
+
+                fileMap.put(i, sf);
             }
         } catch (Exception e) {
             ALog.getInstance().e(e.toString());
@@ -267,6 +268,7 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
     }
 
     private void play(FileSmb file) {
+        ALog.getInstance().d("play: " + file.getId());
 //        Intent intent = new Intent();
 //        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //        intent.setAction(android.content.Intent.ACTION_VIEW);
@@ -279,13 +281,37 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 //        startActivity(Intent.createChooser(it, "分享内容到"));
 
 
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-//        Uri uri = Uri.parse(Environment.getExternalStorageState() + "/Music/林俊杰 - 编号89757/一千年以前 - 林俊杰.mp3");
-        Uri uri = Uri.parse("http://192.168.0.1/2.mp3");
-//        intent.addCategory(Intent.CATEGORY_APP_MUSIC);
-        intent.setDataAndType(uri, "audio/*");
-        startActivity(intent);
+//        Intent intent = new Intent(Intent.ACTION_VIEW);
+////        Uri uri = Uri.parse(Environment.getExternalStorageState() + "/Music/林俊杰 - 编号89757/一千年以前 - 林俊杰.mp3");
+//        Uri uri = Uri.parse("http://192.168.0.1/2.mp3");
+////        intent.addCategory(Intent.CATEGORY_APP_MUSIC);
+//        intent.setDataAndType(uri, "audio/*");
+//        startActivity(intent);
 
+
+        if (!StreamService.isRunning()) {
+            ALog.getInstance().d("startService");
+            Intent i = new Intent(this, StreamService.class);
+            startService(i);
+        } else {
+            ALog.getInstance().d("server is running");
+        }
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        intent.setDataAndType(getHttpUri(fileMap.get(file.getIndex())), SmbUtils.getMimeType(fileMap.get(file.getIndex())));
+        startActivity(intent);
+    }
+
+    public Uri getHttpUri(SmbFile smbFile) {
+        final URL url = smbFile.getURL();
+        final Uri.Builder builder = new Uri.Builder();
+        builder.scheme("http").encodedAuthority("127.0.0.1:" + HttpServer.PORT)
+                .encodedPath(HttpServer.URI_PREFIX)
+                .appendEncodedPath(url.getAuthority())
+                .appendEncodedPath(Uri.encode(url.getPath().substring(1), "/"));
+        final Uri uri = builder.build();
+        ALog.getInstance().d("get http uri: " + uri.toString());
+        return uri;
     }
 
     @Override

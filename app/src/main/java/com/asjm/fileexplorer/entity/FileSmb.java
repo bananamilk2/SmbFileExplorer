@@ -1,25 +1,21 @@
 package com.asjm.fileexplorer.entity;
 
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
+import org.greenrobot.greendao.annotation.Property;
 
 import java.util.Date;
-
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Property;
 
 @Entity(nameInDb = "tableFiles")
 public class FileSmb {
     @Id(autoincrement = true)
     private Long id;
-
     @Property
     private int index;
-
     @Index(unique = true)
     private String hash;
-
     @Property
     private String fileSource;
     @Property
@@ -42,8 +38,8 @@ public class FileSmb {
 
     @Generated(hash = 951967118)
     public FileSmb(Long id, int index, String hash, String fileSource, String name,
-            Long size, Long date, Date downloadTime, boolean dir, int type,
-            String path) {
+                   Long size, Long date, Date downloadTime, boolean dir, int type,
+                   String path) {
         this.id = id;
         this.index = index;
         this.hash = hash;
