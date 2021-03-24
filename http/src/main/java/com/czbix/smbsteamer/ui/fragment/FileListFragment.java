@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.ListFragment;
 
+import com.asjm.lib.util.ALog;
 import com.czbix.smbsteamer.dao.model.Server;
 import com.czbix.smbsteamer.helper.PreferenceHelper;
 import com.czbix.smbsteamer.model.SmbFileItem;
@@ -99,9 +100,11 @@ public class FileListFragment extends ListFragment {
         }
 
         if (!StreamService.isRunning()) {
+            ALog.getInstance().d("startService");
             getActivity().startService(new Intent(getActivity(), StreamService.class));
         }
         final Intent intent = new Intent(Intent.ACTION_VIEW);
+        ALog.getInstance().d(SmbUtils.getMimeType(item.get()));
         intent.setDataAndType(item.getHttpUri(), SmbUtils.getMimeType(item.get()));
         startActivity(intent);
     }

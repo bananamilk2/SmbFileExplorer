@@ -25,6 +25,7 @@ import com.asjm.fileexplorer.http.HttpServer;
 import com.asjm.fileexplorer.listener.IProgressListener;
 import com.asjm.fileexplorer.listener.OnItemClickListener;
 import com.asjm.fileexplorer.listener.OnItemLongClickListener;
+import com.asjm.fileexplorer.manager.DaoManager;
 import com.asjm.fileexplorer.service.StreamService;
 import com.asjm.fileexplorer.utils.DialogHelper;
 import com.asjm.fileexplorer.utils.SmbUtils;
@@ -209,7 +210,6 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
 
                     ALog.getInstance().d("sort finish");
 
-
                     List<FileSmb> fileSmbs = copyList(subFiles);
 
                     ALog.getInstance().d("finish " + fileSmbs.size());
@@ -248,8 +248,8 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
         try {
             for (int i = 0; i < subFiles.length; i++) {
                 SmbFile sf = subFiles[i];
+
                 FileSmb fs = new FileSmb();
-//                fs.setFile(sf);
                 fs.setIndex(i);
                 fs.setName(sf.getName());
                 fs.setDate(sf.getDate());
@@ -257,8 +257,9 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
                 fs.setSize(sf.getContentLengthLong());
                 fs.setPath(sf.getPath());
                 list.add(fs);
-
                 fileMap.put(i, sf);
+                ALog.getInstance().d("insert into database: " + fs.toString());
+                DaoManager.getInstance().getDaoSession().getFileSmbDao().insert(fs);
             }
         } catch (Exception e) {
             ALog.getInstance().e(e.toString());
@@ -297,8 +298,10 @@ public class BrowseActivity extends AppCompatActivity implements OnItemClickList
             ALog.getInstance().d("server is running");
         }
         final Intent intent = new Intent(Intent.ACTION_VIEW);
-
-        intent.setDataAndType(getHttpUri(fileMap.get(file.getIndex())), SmbUtils.getMimeType(fileMap.get(file.getIndex())));
+        Uri uri = getHttpUri(fileMap.get(file.getIndex()));
+        String type = SmbUtils.getMimeType(fileMap.get(file.getIndex()));
+        ALog.getInstance().d(uri.toString() + "  " + type);
+        intent.setDataAndType(uri, type);
         startActivity(intent);
     }
 

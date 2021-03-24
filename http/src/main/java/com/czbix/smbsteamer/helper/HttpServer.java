@@ -3,6 +3,7 @@ package com.czbix.smbsteamer.helper;
 import android.net.Uri;
 import android.util.Log;
 
+import com.asjm.lib.util.ALog;
 import com.czbix.smbsteamer.BuildConfig;
 import com.czbix.smbsteamer.util.IoUtils;
 import com.czbix.smbsteamer.util.SmbUtils;
@@ -32,6 +33,7 @@ public final class HttpServer extends NanoHTTPD {
 
     public HttpServer() {
         super(BuildConfig.DEBUG ? null : "127.0.0.1", PORT);
+        ALog.getInstance().d("httpServer");
         setAsyncRunner(new ThreadPoolRunner());
     }
 
@@ -39,6 +41,7 @@ public final class HttpServer extends NanoHTTPD {
     public Response serve(IHTTPSession session) {
         //noinspection LoopStatementThatDoesntLoop
         while (true) {
+            ALog.getInstance().d("serve");
             final Method method = session.getMethod();
             String uri = session.getUri();
             Log.v(TAG, String.format("serve request: %s %s", method, uri));
@@ -59,9 +62,10 @@ public final class HttpServer extends NanoHTTPD {
     }
 
     private Response handleStream(String uri, IHTTPSession session) {
+        ALog.getInstance().d(uri);
         SmbFile smbFile;
         try {
-            smbFile = new SmbFile("smb://" + uri, NtlmPasswordAuthentication.ANONYMOUS);
+            smbFile = new SmbFile("smb://" + uri);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -84,6 +88,7 @@ public final class HttpServer extends NanoHTTPD {
     }
 
     private Response serveFile(Map<String, String> header, SmbFile file, String mime) {
+        ALog.getInstance().d("serverFile");
         Response res;
         boolean success = false;
         InputStream fis = null;
@@ -221,6 +226,7 @@ public final class HttpServer extends NanoHTTPD {
 
         @Override
         public void closeAll() {
+            ALog.getInstance().d("closeAll");
             // copy of the list for concurrency
             mExecutor.shutdown();
             for (ClientHandler clientHandler : Lists.newArrayList(running)) {
@@ -230,11 +236,13 @@ public final class HttpServer extends NanoHTTPD {
 
         @Override
         public void closed(ClientHandler clientHandler) {
+            ALog.getInstance().d("closed");
             running.remove(clientHandler);
         }
 
         @Override
         public void exec(ClientHandler clientHandler) {
+            ALog.getInstance().d("exec");
             running.add(clientHandler);
             mExecutor.submit(clientHandler);
         }

@@ -3,6 +3,7 @@ package com.czbix.smbsteamer.model;
 import android.net.Uri;
 import android.util.Log;
 
+import com.asjm.lib.util.ALog;
 import com.czbix.smbsteamer.helper.HttpServer;
 
 import java.net.URL;
@@ -41,6 +42,11 @@ public class SmbFileItem {
 
     public Uri getHttpUri() {
         final URL url = mSmbFile.getURL();
+        ALog.getInstance().d(url.toString());
+        ALog.getInstance().d(url.getAuthority());
+        ALog.getInstance().d(url.getPath());
+        ALog.getInstance().d(url.getPath().substring(1));
+        ALog.getInstance().d(Uri.encode(url.getPath().substring(1), "/"));
         final Uri.Builder builder = new Uri.Builder();
         builder.scheme("http").encodedAuthority("127.0.0.1:" + HttpServer.PORT)
                 .encodedPath(HttpServer.URI_PREFIX)
@@ -48,7 +54,7 @@ public class SmbFileItem {
                 .appendEncodedPath(Uri.encode(url.getPath().substring(1), "/"));
 
         final Uri uri = builder.build();
-        Log.v(TAG, "get http uri: " + uri.toString());
+        ALog.getInstance().d("get http uri: " + uri.toString());
         return uri;
     }
 }

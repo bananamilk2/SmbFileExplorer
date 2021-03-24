@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,24 +30,31 @@ public class HttpServer extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        ALog.getInstance().d("server: " + session.getUri());
+        String uri = session.getUri();
+        ALog.getInstance().d(uri);
+
         Method method = session.getMethod();
         if (method != Method.GET)
             return getForbiddenResponse();
-        return handleStream(session.getUri(), session);
+        if (!uri.startsWith(URI_PREFIX)) {
+            return getForbiddenResponse();
+        }
+        uri = uri.substring(URI_PREFIX.length());
+        return handleStream(uri, session);
     }
 
     private Response handleStream(String uri, IHTTPSession session) {
-        ALog.getInstance().d("handleStream: " + uri);
+        ALog.getInstance().d(uri);
         Response response = null;
         try {
             SmbFile smbFile = null;
-            smbFile = new SmbFile(uri);
+            smbFile = new SmbFile("smb://" + uri);
             if (smbFile.isFile()) {
                 String contentType = smbFile.getContentType();
                 if (contentType == null)
                     contentType = SmbUtils.getMineType(uri);
-                ALog.getInstance().d("mime type = " + contentType);
+                ALog.getInstance().d("mime type = " + contentType + "  " + session.getHeaders().size() + "  ");
+
                 response = convertStream(session.getHeaders(), smbFile, contentType);
             }
         } catch (Exception e) {
@@ -70,6 +76,7 @@ public class HttpServer extends NanoHTTPD {
             for (String key : strings)
                 ALog.getInstance().d(key + " = " + headers.get(key));
             String range = headers.get("range");
+            ALog.getInstance().d(range);
             if (range != null) {
                 if (range.startsWith("bytes=")) {
                     range = range.substring("bytes=".length());
@@ -79,8 +86,7 @@ public class HttpServer extends NanoHTTPD {
                             startFrom = Long.parseLong(range.substring(0, minus));
                             endAt = Long.parseLong(range.substring(minus + 1));
                         }
-                    } catch (Exception e) {
-                        ALog.getInstance().e(e.toString());
+                    } catch (NumberFormatException ignored) {
                     }
                 }
             }
@@ -130,8 +136,8 @@ public class HttpServer extends NanoHTTPD {
         } catch (Exception e) {
             ALog.getInstance().e(e.toString());
             res = getForbiddenResponse();
-        }finally {
-            if(!success && fis != null){
+        } finally {
+            if (!success && fis != null) {
                 IOUtil.closeQuietly(fis);
             }
         }
@@ -149,6 +155,7 @@ public class HttpServer extends NanoHTTPD {
         @Override
         public void closeAll() {
             // copy of the list for concurrency
+            ALog.getInstance().d("closeAll");
             mExecutor.shutdown();
             for (ClientHandler clientHandler : Lists.newArrayList(running)) {
                 clientHandler.close();
@@ -158,10 +165,12 @@ public class HttpServer extends NanoHTTPD {
         @Override
         public void closed(ClientHandler clientHandler) {
             running.remove(clientHandler);
+            ALog.getInstance().d("closed");
         }
 
         @Override
         public void exec(ClientHandler clientHandler) {
+            ALog.getInstance().d("exec");
             running.add(clientHandler);
             mExecutor.submit(clientHandler);
         }

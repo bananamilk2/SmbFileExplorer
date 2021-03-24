@@ -19,12 +19,8 @@ public class StreamService extends IntentService {
     private static volatile boolean stop;
     private static final int SLEEP_SECONDS = 60 * 1000;
 
-    public StreamService(String name) {
-        super(name);
-    }
-
     public StreamService() {
-        super("");
+        super("StreamService");
     }
 
     @Override
@@ -53,7 +49,6 @@ public class StreamService extends IntentService {
         running = true;
         final HttpServer httpServer = new HttpServer();
         try {
-            ALog.getInstance().d("onHandleWork");
             httpServer.start();
             while (true) {
                 if (stop) {
