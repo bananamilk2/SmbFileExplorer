@@ -1,5 +1,6 @@
 package com.asjm.fileexplorer.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -8,6 +9,7 @@ import com.asjm.fileexplorer.BuildConfig;
 import com.asjm.fileexplorer.R;
 import com.asjm.fileexplorer.databinding.ActivityFragmentBinding;
 import com.asjm.fileexplorer.entity.Server;
+import com.asjm.fileexplorer.service.TestIntentService;
 import com.asjm.fileexplorer.ui.AddServerDialog;
 import com.asjm.fileexplorer.ui.fragment.ServerListFragment;
 import com.asjm.lib.util.ALog;
@@ -50,6 +52,12 @@ public class FragmentActivity extends AppCompatActivity implements AddServerDial
             case R.id.action_add_server:
                 final AddServerDialog dialog = new AddServerDialog();
                 dialog.show(getSupportFragmentManager(), "add_server");
+                return true;
+            case R.id.action_test:
+
+                Intent intent = new Intent(FragmentActivity.this, TestIntentService.class);
+                startService(intent);
+
                 return true;
         }
         return super.onOptionsItemSelected(item);

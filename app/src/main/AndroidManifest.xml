@@ -17,7 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="q">
-        <activity android:name=".view.MainActivity"
+        <activity
+            android:name=".view.MainActivity"
             android:icon="@drawable/smblogo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,6 +33,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <activity android:name=".view.FragmentActivity"
             android:label="FragmengActivity"
             android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar">
@@ -43,8 +45,10 @@
 
         <service
             android:name=".service.StreamService"
-            android:exported="false" >
-        </service>
+            android:exported="false"/>
+
+        <service android:name=".service.TestIntentService" />
+
     </application>
 
 </manifest>
