@@ -6,6 +6,7 @@ import android.view.MenuItem;
 
 import com.asjm.fileexplorer.BuildConfig;
 import com.asjm.fileexplorer.R;
+import com.asjm.fileexplorer.databinding.ActivityFragmentBinding;
 import com.asjm.fileexplorer.entity.Server;
 import com.asjm.fileexplorer.ui.AddServerDialog;
 import com.asjm.fileexplorer.ui.fragment.ServerListFragment;
@@ -19,13 +20,17 @@ import androidx.fragment.app.ListFragment;
 public class FragmentActivity extends AppCompatActivity implements AddServerDialog.Listener, ServerListFragment.Listener {
 
     private ListFragment listFragment;
+    private ActivityFragmentBinding activityFragmentBinding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ALog.getInstance().d("onCreate");
+        activityFragmentBinding = ActivityFragmentBinding.inflate(getLayoutInflater());
+        setContentView(activityFragmentBinding.getRoot());
+
         listFragment = new ServerListFragment();
-        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, listFragment).commit();
+        getSupportFragmentManager().beginTransaction().replace(activityFragmentBinding.content.getId(), listFragment).commit();
     }
 
     @Override
