@@ -15,89 +15,94 @@ import androidx.fragment.app.Fragment;
 public abstract class BaseFragment extends Fragment {
 
     private String fragmentName;
+    private ALog log;
 
-    public BaseFragment(){}
+    public BaseFragment() {
+        log = ALog.getInstance();
+    }
 
     public BaseFragment(String fragmentName) {
         this.fragmentName = fragmentName;
+        log = ALog.getLogger();
+        log.setChildTag(fragmentName);
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        ALog.getInstance().d("onAttach");
+        log.d("onAttach");
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ALog.getInstance().d("onCreate");
+        log.d("onCreate");
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ALog.getInstance().d("onViewCreated");
+        log.d("onViewCreated");
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        ALog.getInstance().d("onCreateView");
+        log.d("onCreateView");
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ALog.getInstance().d("onActivityCreated");
+        log.d("onActivityCreated");
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        ALog.getInstance().d("onStart");
+        log.d("onStart");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        ALog.getInstance().d("onResume");
+        log.d("onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ALog.getInstance().d("onPause");
+        log.d("onPause");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        ALog.getInstance().d("onStop");
+        log.d("onStop");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ALog.getInstance().d("onDestroyView");
+        log.d("onDestroyView");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ALog.getInstance().d("onDestroy");
+        log.d("onDestroy");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        ALog.getInstance().d("onDetach");
+        log.d("onDetach");
     }
 
     @Override
     public void onAttachFragment(@NonNull Fragment childFragment) {
         super.onAttachFragment(childFragment);
-        ALog.getInstance().d("onAttachFragment");
+        log.d("onAttachFragment");
     }
 }

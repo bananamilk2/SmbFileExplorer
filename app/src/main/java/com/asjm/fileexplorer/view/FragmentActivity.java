@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.asjm.fileexplorer.BuildConfig;
@@ -35,12 +33,43 @@ public class FragmentActivity extends BaseActivity implements AddServerDialog.Li
 
         activityFragmentBinding = ActivityFragmentBinding.inflate(getLayoutInflater());
         setContentView(activityFragmentBinding.getRoot());
+        initMenu();
 
         listFragment = new ServerListFragment();
         getSupportFragmentManager().beginTransaction().replace(activityFragmentBinding.content.getId(), listFragment).commit();
 
-        initMenu();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        ALog.getInstance().d("onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ALog.getInstance().d("onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ALog.getInstance().d("onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        ALog.getInstance().d("onStop");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        ALog.getInstance().d("onDestroy");
+    }
+
 
     private void initMenu() {
         for (String s : menuList) {
@@ -106,7 +135,7 @@ public class FragmentActivity extends BaseActivity implements AddServerDialog.Li
     public void onClick(View v) {
         ALog.getInstance().d(v.getTag());
         if (menuList[1].equals(v.getTag())) {
-            ExpandListFragment expandListFragment = new ExpandListFragment();
+            ExpandListFragment expandListFragment = new ExpandListFragment("ExpandListFragment");
             getSupportFragmentManager().beginTransaction().replace(activityFragmentBinding.content.getId(), expandListFragment).commit();
             activityFragmentBinding.mainSlideMenu.closeLeftSlide();
         }
