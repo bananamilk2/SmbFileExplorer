@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.asjm.fileexplorer.ui.view.ListScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/scrollview"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#334456" />
+
+        <com.asjm.fileexplorer.ui.view.ScrollListView
+            android:id="@+id/listview"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:background="#33445566" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="800dp"
+            android:background="#334456"
+            android:visibility="visible" />
+    </LinearLayout>
+
+</com.asjm.fileexplorer.ui.view.ListScrollView>

@@ -1,11 +1,13 @@
 package com.asjm.fileexplorer.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 
 import com.asjm.fileexplorer.BuildConfig;
 import com.asjm.fileexplorer.R;
@@ -14,17 +16,27 @@ import com.asjm.fileexplorer.entity.Server;
 import com.asjm.fileexplorer.service.TestIntentService;
 import com.asjm.fileexplorer.ui.AddServerDialog;
 import com.asjm.fileexplorer.ui.fragment.ExpandListFragment;
+import com.asjm.fileexplorer.ui.fragment.ScrollViewWithListViewFragment;
 import com.asjm.fileexplorer.ui.fragment.ServerListFragment;
+import com.asjm.fileexplorer.ui.fragment.TestFragment;
+import com.asjm.fileexplorer.ui.fragment.TreeViewFragment;
 import com.asjm.lib.util.ALog;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import androidx.annotation.Nullable;
-import androidx.fragment.app.ListFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-public class FragmentActivity extends BaseActivity implements AddServerDialog.Listener, ServerListFragment.Listener, View.OnClickListener {
+public class FragmentActivity extends BaseActivity implements AddServerDialog.Listener, ServerListFragment.Listener, View.OnClickListener, AdapterView.OnItemClickListener {
 
-    private ListFragment listFragment;
     private ActivityFragmentBinding activityFragmentBinding;
-    private String[] menuList = {"server list", "test expand layout"};
+    private Fragment currentFragment;
+    private LinkedHashMap<String, Class<?>> listItems = new LinkedHashMap<>();
+    private List<String> list;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,11 +46,19 @@ public class FragmentActivity extends BaseActivity implements AddServerDialog.Li
         activityFragmentBinding = ActivityFragmentBinding.inflate(getLayoutInflater());
         setContentView(activityFragmentBinding.getRoot());
         initMenu();
-
-        listFragment = new ServerListFragment();
-        getSupportFragmentManager().beginTransaction().replace(activityFragmentBinding.content.getId(), listFragment).commit();
-
     }
+
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev) {
+//        ALog.getInstance().d("dispatchTouchEvent: " + ev.getAction());
+//        return super.dispatchTouchEvent(ev);
+//    }
+//
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        ALog.getInstance().d("onTouchEvent: " + event.getAction());
+//        return super.onTouchEvent(event);
+//    }
 
     @Override
     public void onStart() {
@@ -70,17 +90,63 @@ public class FragmentActivity extends BaseActivity implements AddServerDialog.Li
         ALog.getInstance().d("onDestroy");
     }
 
-
     private void initMenu() {
-        for (String s : menuList) {
-            TextView textView = new TextView(this);
-            textView.setText(s);
-            textView.setTextSize(18);
-            textView.setTextColor(getResources().getColor(R.color.black));
-            textView.setOnClickListener(this);
-            textView.setTag(s);
-            activityFragmentBinding.leftContent.addView(textView);
+        listItems.put("ExpandListFragment", ExpandListFragment.class);
+        listItems.put("TestFragment", TestFragment.class);
+        listItems.put("TreeViewFragment", TreeViewFragment.class);
+        listItems.put("ScrollViewWithListViewFragment", ScrollViewWithListViewFragment.class);
+        list = new ArrayList(listItems.keySet());
+
+        activityFragmentBinding.leftList.setAdapter(new SimpleAdapter(this, list));
+        activityFragmentBinding.leftList.setOnItemClickListener(this);
+        activityFragmentBinding.leftList.setDividerHeight(1);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ALog.getInstance().d(position);
+        Class<?> aClass = listItems.get(list.get(position));
+        showAndHide(R.id.content, aClass);
+        activityFragmentBinding.mainSlideMenu.closeLeftSlide();
+    }
+
+    private void showAndHide(int contentId, Class<?> clazz) {
+        if (currentFragment != null && currentFragment.getClass().getSimpleName().equals(clazz.getSimpleName())) {
+            return;
         }
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        try {
+            Fragment fragmentByTag = getSupportFragmentManager().findFragmentByTag(clazz.getSimpleName());
+            if (fragmentByTag != null) {
+                transaction.show(fragmentByTag);
+                transaction.hide(currentFragment);
+                currentFragment = fragmentByTag;
+            } else {
+                Fragment fragment = (Fragment) clazz.newInstance();
+                transaction.add(contentId, fragment, clazz.getSimpleName());
+                if (currentFragment != null) {
+                    transaction.hide(currentFragment);
+                }
+                currentFragment = fragment;
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            ALog.getInstance().e(e.toString());
+        }
+    }
+
+    private class SimpleAdapter extends ArrayAdapter<String> {
+
+        public SimpleAdapter(Context context, List<String> objects) {
+            super(context, android.R.layout.simple_list_item_1, objects);
+
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
     }
 
     public void openMenu(View view) {
@@ -133,11 +199,6 @@ public class FragmentActivity extends BaseActivity implements AddServerDialog.Li
 
     @Override
     public void onClick(View v) {
-        ALog.getInstance().d(v.getTag());
-        if (menuList[1].equals(v.getTag())) {
-            ExpandListFragment expandListFragment = new ExpandListFragment("ExpandListFragment");
-            getSupportFragmentManager().beginTransaction().replace(activityFragmentBinding.content.getId(), expandListFragment).commit();
-            activityFragmentBinding.mainSlideMenu.closeLeftSlide();
-        }
+
     }
 }

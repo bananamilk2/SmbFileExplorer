@@ -24,9 +24,13 @@ public class ExpandListFragment extends BaseFragment {
 
     private FragmentExpandListBinding fragmentExpandListBinding;
 
+    public ExpandListFragment() {
+        this("ExpandListFragment");
+    }
+
+
     public ExpandListFragment(String name) {
         super(name);
-
     }
 
     @Nullable

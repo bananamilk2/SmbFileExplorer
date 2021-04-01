@@ -1,6 +1,5 @@
 package com.asjm.fileexplorer.ui.fragment;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +9,6 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.asjm.fileexplorer.R;
-import com.asjm.fileexplorer.ui.adapter.MyBaseExpandableListAdapter;
-import com.asjm.fileexplorer.ui.adapter.bean.Group;
-import com.asjm.fileexplorer.ui.adapter.bean.Item;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +17,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class TestFragment extends BaseFragment {
+
+    public TestFragment() {
+        this("TestFragment");
+    }
 
     public TestFragment(String fragmentName) {
         super(fragmentName);
