@@ -1,3 +1,4 @@
+include ':bindertest1'
 include ':lib'
 include ':demo'
 include ':app'

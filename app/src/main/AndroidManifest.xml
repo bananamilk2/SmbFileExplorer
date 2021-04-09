@@ -34,9 +34,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.FragmentActivity"
+        <activity
+            android:name=".view.FragmentActivity"
             android:label="FragmengActivity">
-<!--            android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar">-->
+            <!--            android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar">-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -45,9 +46,17 @@
 
         <service
             android:name=".service.StreamService"
-            android:exported="false"/>
+            android:exported="false" />
 
         <service android:name=".service.TestIntentService" />
+
+        <service
+            android:name="com.asjm.fileexplorer.service.MediaScanService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.asjm.service.MEDIA_SERVICE" />
+            </intent-filter>
+        </service>
 
     </application>
 

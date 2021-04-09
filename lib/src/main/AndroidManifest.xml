@@ -1,5 +1,3 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.asjm.lib">
-
-    /
+    package="com.asjm.libs">
 </manifest>
