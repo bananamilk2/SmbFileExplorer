@@ -1,10 +1,15 @@
 package com.asjm.fileexplorer.view;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +28,7 @@ import com.asjm.fileexplorer.ui.fragment.ScrollViewWithListViewFragment;
 import com.asjm.fileexplorer.ui.fragment.ServerListFragment;
 import com.asjm.fileexplorer.ui.fragment.TestFragment;
 import com.asjm.fileexplorer.ui.fragment.TreeViewFragment;
+import com.asjm.lib.aidl.IMediaManagerInterface;
 import com.asjm.lib.util.ALog;
 
 import java.util.ArrayList;
@@ -69,10 +75,42 @@ public class FragmentActivity extends BaseActivity implements AddServerDialog.Li
         ALog.getInstance().d("onStart");
     }
 
+
+
     @Override
     public void onResume() {
         super.onResume();
-        ALog.getInstance().d("onResume");
+
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent("com.asjm.service.MEDIA_SERVICE");
+                intent.setPackage("com.asjm.fileexplorer");
+//                intent.setComponent(new ComponentName("com.asjm.fileexplorer", "com.asjm.fileexplorer.service.MediaScanService"));
+                bindService(intent, new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        ALog.getInstance().d("onServiceConnected: " + service);
+                        IMediaManagerInterface iMediaManagerInterface = IMediaManagerInterface.Stub.asInterface(service);
+
+                        ALog.getInstance().d("onServiceConnected: " + iMediaManagerInterface);
+                        int size = 0;
+                        try {
+                            size = iMediaManagerInterface.getSize();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                        ALog.getInstance().d(size);
+                    }
+
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+
+                    }
+                }, BIND_AUTO_CREATE);
+            }
+        }, 1000);
     }
 
     @Override

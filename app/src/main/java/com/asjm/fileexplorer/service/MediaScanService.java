@@ -3,7 +3,9 @@ package com.asjm.fileexplorer.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
@@ -12,6 +14,7 @@ import com.asjm.lib.aidl.IMediaManagerInterface;
 import com.asjm.lib.entity.MediaBean;
 import com.asjm.lib.util.ALog;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class MediaScanService extends Service {
@@ -21,8 +24,9 @@ public class MediaScanService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        ALog.getInstance().d("onBind");
-        return new MyBinder();
+        IBinder binder = new MyBinder();
+        ALog.getInstance().d("onBind: " + binder);
+        return binder;
     }
 
 
@@ -31,6 +35,7 @@ public class MediaScanService extends Service {
         ALog.getInstance().d("onUnbindService");
         return super.onUnbind(intent);
     }
+
 
     @Override
     public void onCreate() {
@@ -101,5 +106,9 @@ public class MediaScanService extends Service {
             remoteCallbackList.unregister(callback);
         }
 
+//        @Override
+//        public IBinder asBinder() {
+//            return null;
+//        }
     }
 }

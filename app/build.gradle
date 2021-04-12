@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.greenrobot.greendao'
+apply plugin: 'com.hyperion.methodmonitor.plugin'
 //apply plugin: 'miqt.plugin.tools'
 //apply plugin: 'android-aspectjx'
 //apply plugin: 'com.jakewharton.hugo'
@@ -71,5 +72,7 @@ dependencies {
     implementation 'com.google.guava:guava:18.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.github.bmelnychuk:atv:1.2.+'
+
+    implementation 'com.github.HyperionChen.MethodTimeMonitor:business:1.0.2'
 
 }
