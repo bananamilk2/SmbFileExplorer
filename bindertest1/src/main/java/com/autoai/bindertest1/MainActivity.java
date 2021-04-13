@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
             getApplicationContext().bindService(i, conn, BIND_AUTO_CREATE);
         }, 2000);
 
+        new View(this).setOnClickListener();
     }
 
     private ServiceConnection conn = new ServiceConnection() {
