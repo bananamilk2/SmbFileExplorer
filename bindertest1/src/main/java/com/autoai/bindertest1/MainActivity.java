@@ -61,8 +61,6 @@ public class MainActivity extends AppCompatActivity {
             i.setAction("com.asjm.service.MEDIA_SERVICE");
             getApplicationContext().bindService(i, conn, BIND_AUTO_CREATE);
         }, 2000);
-
-        new View(this).setOnClickListener();
     }
 
     private ServiceConnection conn = new ServiceConnection() {

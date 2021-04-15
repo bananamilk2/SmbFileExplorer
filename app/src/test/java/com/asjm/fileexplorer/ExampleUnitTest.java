@@ -1,38 +1,74 @@
 package com.asjm.fileexplorer;
 
-import android.os.SystemClock;
-import android.util.Log;
-
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class ExampleUnitTest {
-    String TAG = "ExampleUnitTest";
-
     @Test
     public void addition_isCorrect() {
-//        assertEquals(4, 2 + 2);
-//        System.out.println(new Child());
-        System.out.println(new Sub());
+//        A a = new A();
+        B a = new B();
+//        getCons(a);
+//        getMethods(a);
+
     }
 
-    public abstract class Father {
-        public Father() {
-            System.out.println(this);
+    private void getMethods(B a) {
+        Method[] methods = a.getClass().getDeclaredMethods();
+        for(Method m : methods){
+            Log.d(m.getName());
+            Log.d(m.getModifiers());
+            Log.d(m.getReturnType());
+            Log.d(m.getParameterTypes());
         }
     }
 
-    public class Child extends Father {
-        public Child() {
-            System.out.println(this);
+    private void getCons(B a) {
+        Constructor<?>[] constructors = a.getClass().getConstructors();
+        Log.d(constructors.length);
+        for (Constructor c : constructors) {
+            Log.d(c.getName());
+
         }
+    }
+}
+
+class A {
+    private String name;
+    public int id;
+
+    public String getName() {
+        return this.name;
+    }
+
+    private int getId() {
+        return this.id;
+    }
+
+}
+
+class B extends A {
+
+    public Long l;
+    private boolean b;
+
+    public B() {
 
     }
 
-    public class Sub extends Child {
-        public Sub() {
-            System.out.println(this);
-        }
+    private B(String name) {
+
     }
+
+    public void print() {
+
+    }
+
+    private void setL() {
+
+    }
+
 }

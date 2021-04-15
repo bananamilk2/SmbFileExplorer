@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo;
 
 import com.asjm.fileexplorer.manager.DaoManager;
 import com.asjm.lib.util.ALog;
+import com.hyperion.methodmonitor.business.MethodTimeManager;
 
 
 public class App extends Application {
@@ -19,6 +20,8 @@ public class App extends Application {
         System.setProperty("jcifs.smb.client.dfs.disabled", "true");
         System.setProperty("jcifs.smb.client.soTimeout", "1000000");
         System.setProperty("jcifs.smb.client.responseTimeout", "30000");
+
+        MethodTimeManager.getInstance().setEnable(true);
     }
 
     public static boolean isApkInDebug(Context context) {
@@ -28,5 +31,12 @@ public class App extends Application {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        ALog.getInstance().d("onTerminate");
+        MethodTimeManager.getInstance().setEnable(false);
     }
 }

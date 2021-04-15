@@ -23,6 +23,7 @@ import com.asjm.fileexplorer.databinding.ActivityFragmentBinding;
 import com.asjm.fileexplorer.entity.Server;
 import com.asjm.fileexplorer.service.TestIntentService;
 import com.asjm.fileexplorer.ui.AddServerDialog;
+import com.asjm.fileexplorer.ui.fragment.EmptyFragment;
 import com.asjm.fileexplorer.ui.fragment.ExpandListFragment;
 import com.asjm.fileexplorer.ui.fragment.ScrollViewWithListViewFragment;
 import com.asjm.fileexplorer.ui.fragment.ServerListFragment;
@@ -74,7 +75,6 @@ public class FragmentActivity extends BaseActivity implements AddServerDialog.Li
         super.onStart();
         ALog.getInstance().d("onStart");
     }
-
 
 
     @Override
@@ -136,6 +136,7 @@ public class FragmentActivity extends BaseActivity implements AddServerDialog.Li
         listItems.put("TestFragment", TestFragment.class);
         listItems.put("TreeViewFragment", TreeViewFragment.class);
         listItems.put("ScrollViewWithListViewFragment", ScrollViewWithListViewFragment.class);
+        listItems.put("EmptyFragment", EmptyFragment.class);
         list = new ArrayList(listItems.keySet());
 
         activityFragmentBinding.leftList.setAdapter(new SimpleAdapter(this, list));
